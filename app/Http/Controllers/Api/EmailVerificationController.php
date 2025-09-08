@@ -39,7 +39,22 @@ class EmailVerificationController extends Controller
                     return response()->json(['message' => 'Reset code has expired. Please request a new one.'], 400);
                 }
 
-                return response()->json(['message' => 'Reset password code is validated.'], 200);
+                return response()->json([
+                    'message' => 'Reset password code is validated.',
+                    'data' => array (
+                        'user' => [
+                            'id' => null,
+                            'name' => null,
+                            'email' => $user->email,
+                            'type' => null,
+                            'phone' => null,
+                            'is_verified' => null,
+                            'email_verified_at' => null,
+                        ],
+                        'access_token' => null,
+                        'token_type' => null
+                    )
+                ], 200);
             }
 
             // Check if user is already verified
