@@ -242,6 +242,11 @@ class UserController extends Controller
                 ]);
             }
 
+            $user = User::find($user->id);
+            $patientInfo = $user->patientInfo;
+            $patientInfo->completed = 1;
+            $patientInfo->save();
+
             // Get the users all questionnaires
             $questionnaires = UserQuestionnaire::where('user_id', $user->id)->get();
 

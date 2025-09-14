@@ -49,7 +49,7 @@ Route::name('api.')->group(function () {
         Route::get('doctor', [PatientController::class, 'doctor_details'])->name('doctor.details');
 
         // Admin endpoints
-        Route::prefix('admin')->group(function () {
+        Route::middleware(['auth.admin'])->prefix('admin')->group(function () {
             Route::get('users-list', [AdminUserController::class, 'allUsers']);
             Route::post('approve', [AdminUserController::class, 'approve']);
         });

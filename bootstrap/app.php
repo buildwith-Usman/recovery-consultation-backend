@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AdminAuthentication;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
@@ -20,12 +21,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             HandleAppearance::class,
             HandleInertiaRequests::class,
-            AddLinkHeadersForPreloadedAssets::class,
+            AddLinkHeadersForPreloadedAssets::class
         ]);
         
         // Register custom middleware aliases
         $middleware->alias([
             'email.rate.limit' => \App\Http\Middleware\EmailVerificationRateLimit::class,
+            'auth.admin' => AdminAuthentication::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
