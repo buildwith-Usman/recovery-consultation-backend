@@ -30,8 +30,13 @@ class UserController extends Controller
                 $this->update_doctor($request);
             }
 
+            $questionnaires = @$request->input('questionnaires');
+            if($questionnaires) {
+                $this->add_questionnaires($request);
+            }
+
             // Get user with relations
-            $user = User::with('patientInfo', 'doctorInfo')->where('id', $user->id)->first();
+            $user = User::with('patientInfo', 'doctorInfo', 'questionnaires')->where('id', $user->id)->first();
             
             $user->update([
                 'name' => $request->name ?? $user->name,
@@ -119,6 +124,16 @@ class UserController extends Controller
 
     public function match_doctors_list(Request $request) {
         $user = User::with(['patientInfo', 'questionnaires'])->where('id', auth()->user()->id)->first();
+
+        if($user->type !== "patient") {
+            return response()->json([
+                'message' => 'User is not valid!',
+                'data' => [
+                    'doctors' => []
+                ]
+            ], 404);
+        }
+
         $looking_for = $user->patientInfo->looking_for ?? null;
 
         $gender_prefer_data = $user->questionnaires
@@ -137,12 +152,12 @@ class UserController extends Controller
 
         if(str_contains($age_prefer, '-')) {
             $age_prefer_arr = explode('-', $age_prefer);
-            $min_age_prefer = $age_prefer_arr[0];
-            $max_age_prefer = $age_prefer_arr[1];
+            $min_age_prefer = (int)$age_prefer_arr[0];
+            $max_age_prefer = (int)$age_prefer_arr[1];
         } else if(str_contains($age_prefer, '+')) {
-            $min_age_prefer = str_replace('+', '', $age_prefer);
+            $min_age_prefer = (int)str_replace('+', '', $age_prefer);
         } else if(str_contains($age_prefer, '<')) {
-            $max_age_prefer = str_replace('<', '', $age_prefer);
+            $max_age_prefer = (int)str_replace('<', '', $age_prefer);
         }
 
         $lang_prefer = $user->questionnaires
@@ -209,6 +224,8 @@ class UserController extends Controller
                     'errors' => ['No questionnaires provided']
                 ], 400);
             }
+
+            UserQuestionnaire::where('user_id', $user->id)->delete();
 
             // Validate and add new questionnaires
             foreach ($questionnaires as $questionnaire) {

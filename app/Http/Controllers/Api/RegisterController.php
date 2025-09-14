@@ -119,26 +119,7 @@ class RegisterController extends Controller
 
         if ($doctorInfo) {
             $doctorInfo->update([
-                'specialization' => $validatedData['specialization'],
-                'experience' => $validatedData['experience'],
-                'dob' => $validatedData['dob'] ?? null,
-                'age' => $validatedData['age'] ?? null,
-                'gender' => $validatedData['gender'] ?? null,
-                'degree' => $validatedData['degree'] ?? null,
-                'license_no' => $validatedData['license_no'] ?? null,
-            ]);
-
-            // Update languages
-            foreach ($validatedData['languages'] as $language) {
-                UserLanguage::updateOrCreate(
-                    ['user_id' => $user->id, 'language' => $language],
-                    ['language' => $language]
-                );
-            }
-        } else {
-            $doctorInfo = DoctorInfo::create([
-                'user_id' => $user->id,
-                'specialization' => $validatedData['specialization'],
+                'specialization' => $validatedData['specialization'] ?? null,
                 'experience' => $validatedData['experience'] ?? null,
                 'dob' => $validatedData['dob'] ?? null,
                 'age' => $validatedData['age'] ?? null,
@@ -147,11 +128,34 @@ class RegisterController extends Controller
                 'license_no' => $validatedData['license_no'] ?? null,
             ]);
 
-            foreach ($validatedData['languages'] as $language) {
-                UserLanguage::create([
-                    'user_id' => $user->id,
-                    'language' => $language,
-                ]);
+            // Update languages
+            if(isset($validatedData['languages'])) {
+                foreach ($validatedData['languages'] as $language) {
+                    UserLanguage::updateOrCreate(
+                        ['user_id' => $user->id, 'language' => $language],
+                        ['language' => $language]
+                    );
+                }
+            }
+        } else {
+            $doctorInfo = DoctorInfo::create([
+                'user_id' => $user->id,
+                'specialization' => $validatedData['specialization'] ?? null,
+                'experience' => $validatedData['experience'] ?? null,
+                'dob' => $validatedData['dob'] ?? null,
+                'age' => $validatedData['age'] ?? null,
+                'gender' => $validatedData['gender'] ?? null,
+                'degree' => $validatedData['degree'] ?? null,
+                'license_no' => $validatedData['license_no'] ?? null,
+            ]);
+            
+            if(isset($validatedData['languages'])) {
+                foreach ($validatedData['languages'] as $language) {
+                    UserLanguage::create([
+                        'user_id' => $user->id,
+                        'language' => $language,
+                    ]);
+                }
             }
         }
         return $doctorInfo;

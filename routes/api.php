@@ -44,7 +44,12 @@ Route::name('api.')->group(function () {
 
         // Patient's doctors endpoints
         Route::get('match-doctors-list', [UserController::class, 'match_doctors_list'])->name('match.doctors.list');
-        Route::get('doctors-list/{specialization}', [PatientController::class, 'doctors_list'])->name('doctors.list');
+        Route::get('doctors-list', [PatientController::class, 'doctors_list'])->name('doctors.list');
         Route::get('doctor/{id}', [PatientController::class, 'doctor_details'])->name('doctor.details');
+
+        // Admin endpoints
+        Route::prefix('admin')->group(function () {
+            Route::post('approve', [\App\Http\Controllers\Admin\UserController::class, 'approve']);
+        });
     });
 });

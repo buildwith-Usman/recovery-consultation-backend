@@ -8,8 +8,9 @@ use Illuminate\Http\Request;
 
 class PatientController extends Controller
 {
-    public function doctors_list($specialization)
+    public function doctors_list(Request $request)
     {
+        $specialization = $request->input('specialization');
         try {
             // Example query to get doctors based on specialization
             $doctors = User::with(['doctorInfo', 'questionnaires'])
