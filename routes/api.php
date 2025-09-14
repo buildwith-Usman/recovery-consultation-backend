@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\PatientController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\RegisterController;
@@ -45,11 +46,12 @@ Route::name('api.')->group(function () {
         // Patient's doctors endpoints
         Route::get('match-doctors-list', [UserController::class, 'match_doctors_list'])->name('match.doctors.list');
         Route::get('doctors-list', [PatientController::class, 'doctors_list'])->name('doctors.list');
-        Route::get('doctor/{id}', [PatientController::class, 'doctor_details'])->name('doctor.details');
+        Route::get('doctor', [PatientController::class, 'doctor_details'])->name('doctor.details');
 
         // Admin endpoints
         Route::prefix('admin')->group(function () {
-            Route::post('approve', [\App\Http\Controllers\Admin\UserController::class, 'approve']);
+            Route::get('users-list', [AdminUserController::class, 'allUsers']);
+            Route::post('approve', [AdminUserController::class, 'approve']);
         });
     });
 });

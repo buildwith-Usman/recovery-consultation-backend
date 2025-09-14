@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -8,6 +8,15 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+    public function allUsers(Request $request) {
+        $user = User::with('patientInfo', 'doctorInfo')
+        ->where('type', '!=', 'admin')
+        ->orderBy('id', 'desc')->paginate(10);
+        return response()->json([
+            'message' => 'Users list.',
+            'data' => $user
+        ], 200);
+    }
     public function approve(Request $request) {
         $doctor_id = $request->input('doctor_id');
 

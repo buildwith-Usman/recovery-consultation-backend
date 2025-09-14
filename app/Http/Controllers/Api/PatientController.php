@@ -37,13 +37,14 @@ class PatientController extends Controller
         }
     }
 
-    public function doctor_details($id)
+    public function doctor_details(Request $request)
     {
+        $id = $request->input('id');
         try {
             $doctor = User::with(['doctorInfo', 'questionnaires'])->where([
                 'id' => $id,
-                'type' => 'doctor']
-            )->first();
+                'type' => 'doctor'
+            ])->first();
             return response()->json([
                 "message" => "Doctor retrieved successfully",
                 "data" => $doctor

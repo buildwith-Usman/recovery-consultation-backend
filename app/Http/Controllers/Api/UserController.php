@@ -191,8 +191,12 @@ class UserController extends Controller
                 }
                 if($help_support) {
                     $helpSupportArr = explode(',', $help_support);
-                    $query->orWhere('key', 'help_support')
-                        ->whereRaw('FIND_IN_SET(?, answer)', $helpSupportArr);
+                    foreach ($helpSupportArr as $support) {
+                        $query->orWhere(function ($sub) use ($support) {
+                            $sub->where('key', 'help_support')
+                                ->whereRaw('FIND_IN_SET(?, answer)', [$support]);
+                        });
+                    }
                 }
             });
         })
