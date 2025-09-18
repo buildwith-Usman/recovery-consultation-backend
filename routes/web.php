@@ -1,12 +1,12 @@
 <?php
 
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\EmailPreviewController;
 
-Route::get('/', function () {
-    return Inertia::render('welcome');
-})->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('main');
+Route::get('/home', [HomeController::class, 'home'])->name('home');
 
 // Email preview route (development only)
 Route::get('/email-preview/verification', [EmailPreviewController::class, 'verificationEmail'])->name('email.preview.verification');
