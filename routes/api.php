@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\FileUploadController;
 use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\PatientController;
 use App\Http\Controllers\Api\UserController;
@@ -35,6 +36,9 @@ Route::name('api.')->group(function () {
     // Forgot password routes
     Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetCode'])->name('forgot-password');
     Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'])->name('reset-password');
+
+    Route::post('/upload-file', [FileUploadController::class, 'uplaod'])->name('file.uplaod');
+    Route::get('/file', [FileUploadController::class, 'file'])->name('file');
 
     // Protected routes
     Route::middleware(['auth:api'])->group(function () {

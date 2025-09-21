@@ -24,6 +24,7 @@ class User extends Authenticatable
         'password',
         'type',
         'phone',
+        'profile_image_id',
         'email_verification_code',
         'email_verification_code_expires_at',
         'is_verified',
@@ -72,5 +73,9 @@ class User extends Authenticatable
 
     public function reviews() {
         return $this->hasMany(UserReview::class, 'receiver_id', 'id');
+    }
+
+    public function file() {
+        return $this->belongsTo(File::class, 'profile_image_id');
     }
 }

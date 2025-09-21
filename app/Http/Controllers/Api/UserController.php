@@ -14,7 +14,7 @@ class UserController extends Controller
 {
     public function index(Request $request) {
         $user = auth()->user();
-        $user = User::with('patientInfo', 'doctorInfo', 'questionnaires', 'userLanguages', 'reviews')->where('id', $user->id)->first();
+        $user = User::with('patientInfo', 'doctorInfo', 'questionnaires', 'userLanguages', 'reviews', 'file')->where('id', $user->id)->first();
         return response()->json(['data' => ['user' => $user]]);
     }
     public function update_profile(Request $request) {
@@ -46,6 +46,7 @@ class UserController extends Controller
             $user->update([
                 'name' => $request->name ?? $user->name,
                 'phone' => $request->phone ?? $user->phone,
+                'profile_image_id' => $request->file_id ?? $user->profile_image_id,
             ]);
     
             return response()->json([
