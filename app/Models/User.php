@@ -69,4 +69,8 @@ class User extends Authenticatable
     public function userLanguages() {
         return $this->hasMany(UserLanguage::class, 'user_id', 'id');
     }
+
+    public function reviews() {
+        return $this->hasMany(UserReview::class, 'receiver_id', 'id');
+    }
 }

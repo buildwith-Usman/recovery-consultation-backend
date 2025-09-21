@@ -1297,6 +1297,7 @@ header.main-header .header-sticky.active .container-fluid::before{
 	text-transform: capitalize;
 	font-weight: 600;
 	margin-bottom: 20px;
+	color: #171717;
 }
 
 .potential-body-content p:last-child{

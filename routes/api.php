@@ -47,6 +47,9 @@ Route::name('api.')->group(function () {
         Route::get('match-doctors-list', [UserController::class, 'match_doctors_list'])->name('match.doctors.list');
         Route::get('doctors-list', [PatientController::class, 'doctors_list'])->name('doctors.list');
         Route::get('doctor', [PatientController::class, 'doctor_details'])->name('doctor.details');
+        Route::post('appointment-booking', [PatientController::class, 'appointment_booking'])->name('appointment.booking');
+        Route::post('appointments-list', [PatientController::class, 'appointments'])->name('appointments');
+        Route::post('add-reviews', [PatientController::class, 'add_reviews'])->name('reviews.add');
 
         // Admin endpoints
         Route::middleware(['auth.admin'])->prefix('admin')->group(function () {

@@ -362,12 +362,12 @@
                         <!-- Mission Vision Item Start -->
                         <div class="mission-vision-list">
                             <div class="row">
-                                <div class="col-md-6 col-12">
+                                <div class="col-12">
                                     <!-- Mission Vision Item Start -->
                                     <div class="mission-vision-item wow fadeInUp" data-wow-delay="0.2s" style="visibility: visible; animation-delay: 0.2s; animation-name: fadeInUp;">
-                                        <div class="icon-box">
+                                        {{-- <div class="icon-box">
                                             <img src="images/icon-our-mission.svg" alt="">
-                                        </div>
+                                        </div> --}}
 
                                         <div class="mission-vision-content">
                                             <h3>our mission</h3>
@@ -377,12 +377,12 @@
                                     <!-- Mission Vision Item End -->
                                 </div>
 
-                                <div class="col-md-6 col-12">
+                                <div class="col-12">
                                     <!-- Mission Vision Item Start -->
                                     <div class="mission-vision-item wow fadeInUp" data-wow-delay="0.4s" style="visibility: visible; animation-delay: 0.4s; animation-name: fadeInUp;">
-                                        <div class="icon-box">
+                                        {{-- <div class="icon-box">
                                             <img src="images/icon-our-vision.svg" alt="">
-                                        </div>
+                                        </div> --}}
 
                                         <div class="mission-vision-content">
                                             <h3>our vision</h3>
@@ -422,6 +422,60 @@
                 <div class="col-lg-6">
                     <!-- Our Approach Image Start -->
                     <div class="our-approach-image">
+
+                        <div class="service-item-list" style="margin-bottom: 0px; padding-bottom: 0px;">
+                        <!-- Service Item Start -->
+                        <div class="service-item wow fadeInUp" style="visibility: visible; animation-name: fadeInUp;">
+                            <div class="icon-box">
+                                <img src="/images/icon-services-1.svg" alt="">
+                            </div>
+
+                            <div class="mission-vision-content">
+                                <h3>Privacy</h3>
+                                <p>Your data is protected with end-to-end encryption and strict privacy policies.</p>
+                            </div>
+                        </div>
+                        <!-- Service Item Start -->
+
+                        <!-- Service Item Start -->
+                        <div class="service-item wow fadeInUp" data-wow-delay="0.2s" style="visibility: visible; animation-delay: 0.2s; animation-name: fadeInUp;">
+                            <div class="icon-box">
+                                <img src="/images/icon-services-2.svg" alt="">
+                            </div>
+
+                            <div class="mission-vision-content">
+                                <h3>Trust</h3>
+                                <p>Built with care and verified by mental health professionals worldwide.</p>
+                            </div>
+                        </div>
+                        <!-- Service Item Start -->
+
+                        <!-- Service Item Start -->
+                        <div class="service-item wow fadeInUp" data-wow-delay="0.2s" style="visibility: visible; animation-delay: 0.2s; animation-name: fadeInUp;">
+                            <div class="icon-box">
+                                <img src="/images/icon-services-2.svg" alt="">
+                            </div>
+
+                            <div class="mission-vision-content">
+                                <h3>Accessibility</h3>
+                                <p>Making mental health care available to everyone, everywhere, anytime.</p>
+                            </div>
+                        </div>
+                        <!-- Service Item Start -->
+
+                        <!-- Service Item Start -->
+                        <div class="service-item wow fadeInUp" data-wow-delay="0.2s" style="visibility: visible; animation-delay: 0.2s; animation-name: fadeInUp;">
+                            <div class="icon-box">
+                                <img src="/images/icon-services-2.svg" alt="">
+                            </div>
+
+                            <div class="mission-vision-content">
+                                <h3>Professional Care</h3>
+                                <p>Connect only with licensed and verified mental health professionals.</p>
+                            </div>
+                        </div>
+                        <!-- Service Item Start -->
+                    </div>
                         {{-- <figure class="image-anime reveal" style="transform: translate(0px, 0px); opacity: 1; visibility: inherit;">
                             <img src="images/our-approach-img.jpg" alt="" style="transform: translate(0px, 0px);">
                         </figure> --}}
@@ -431,6 +485,197 @@
             </div>
         </div>
     </div>
+
+    <!-- Our Potential Start -->
+    <div class="our-potential">
+        <div class="container">
+            <div class="row">
+                <div class="offset-lg-3 col-lg-6" style="text-align: center;">
+                    <!-- Our Potential Content Start -->
+                    <div class="our-potential-content">
+                        <!-- Section Title Start -->
+                        <div class="section-title">
+                            <h3 class="wow fadeInUp">How It Works</h3>
+                            <h2 class="wow fadeInUp" data-wow-delay="0.25s">Simple Steps to <span> Mental Wellness</span></h2>
+                            <p class="wow fadeInUp" data-wow-delay="0.5s">Whether you're seeking mental health support or providing professional care, getting started with Recovery is simple and secure.</p>
+                        </div>
+                        <!-- Section Title End -->
+
+                        <!-- Our Potential Counter Start -->
+                        {{-- <div class="our-potential-counter">
+                            <!-- Potential Counter Item Start -->
+                            <div class="potential-counter-item">
+                                <div class="counter-circle">
+                                    <h2><span class="counter">98</span>%</h2>
+                                </div>
+                                <div class="potential-counter-content">
+                                    <h3>satisfied customers</h3>
+                                </div>
+                            </div>
+                            <!-- Potential Counter Item End -->
+
+                            <!-- Potential Counter Item Start -->
+                            <div class="potential-counter-item">
+                                <div class="counter-circle">
+                                    <h2><span class="counter">20</span>K</h2>
+                                </div>
+                                <div class="potential-counter-content">
+                                    <h3>projects completed</h3>
+                                </div>
+                            </div>
+                            <!-- Potential Counter Item End -->
+                        </div> --}}
+                        <!-- Our Potential Counter End -->
+
+                        <!-- Our Potential Body Start -->
+                        {{-- <div class="our-potential-body">
+                            <!-- Potential Body Content Start -->
+                            <div class="potential-body-content">
+                                <h3 class="wow fadeInUp">certified and experienced coaching professionals</h3>
+                                <p class="wow fadeInUp" data-wow-delay="0.2s">Our team consists of highly trained and certified coaches who stay up-to-date with the latest coaching practices.</p>
+                            </div>
+                            <!-- Potential Body Content End -->
+
+                            <!-- Potential Body List Start -->
+                            <div class="potential-body-list wow fadeInUp" data-wow-delay="0.4s">
+                                <ul>
+                                    <li>continuous support and accountability</li>
+                                    <li>results-driven methods that deliver lasting change</li>
+                                </ul>
+                            </div>
+                            <!-- Potential Body List End -->
+                        </div> --}}
+                        <!-- Our Potential Body End -->
+                    </div>
+                    <!-- Our Potential Content End -->
+                </div>
+
+                <div class="col-lg-12">
+                    <div class="our-potential-body">
+                        <div class="potential-body-content">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <h3 class="wow fadeInUp">For Patients</h3>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="service-item-list">
+                                        <!-- Service Item Start -->
+                                        <div class="service-item wow fadeInUp">
+                                            <div class="icon-box">
+                                                <img src="{{asset('images/icon-services-1.svg')}}" alt="">
+                                            </div>
+        
+                                            <div>
+                                                <h3>Download the App</h3>
+                                                <p>Get the Recovery app from Play Store and create your secure account.</p>
+                                            </div>
+                                        </div>
+                                        <!-- Service Item Start -->
+        
+                                        <!-- Service Item Start -->
+                                        <div class="service-item wow fadeInUp" data-wow-delay="0.2s">
+                                            <div class="icon-box">
+                                                <img src="{{asset('images/icon-services-2.svg')}}" alt="">
+                                            </div>
+        
+                                            <div>
+                                                <h3>Book Appointment</h3>
+                                                <p>Choose from available mental health professionals and schedule your consultation.</p>
+                                            </div>
+                                        </div>
+                                        <!-- Service Item Start -->
+
+                                        <!-- Service Item Start -->
+                                        <div class="service-item wow fadeInUp" data-wow-delay="0.2s">
+                                            <div class="icon-box">
+                                                <img src="{{asset('images/icon-services-2.svg')}}" alt="">
+                                            </div>
+        
+                                            <div>
+                                                <h3>Consult Online</h3>
+                                                <p>Join secure video calls with licensed therapists and psychiatrists.</p>
+                                            </div>
+                                        </div>
+                                        <!-- Service Item Start -->
+
+                                        <!-- Service Item Start -->
+                                        <div class="service-item wow fadeInUp" data-wow-delay="0.2s">
+                                            <div class="icon-box">
+                                                <img src="{{asset('images/icon-services-2.svg')}}" alt="">
+                                            </div>
+        
+                                            <div>
+                                                <h3>Order & Track</h3>
+                                                <p>Order prescribed medicines and track your progress through the app.</p>
+                                            </div>
+                                        </div>
+                                        <!-- Service Item Start -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <h3 class="wow fadeInUp">For Doctors</h3>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="service-item-list">
+                                        <!-- Service Item Start -->
+                                        <div class="service-item wow fadeInUp">
+                                            <div class="icon-box">
+                                                <img src="{{asset('images/icon-services-1.svg')}}" alt="">
+                                            </div>
+        
+                                            <div>
+                                                <h3>Register</h3>
+                                                <p>Sign up on the Recovery platform with your professional credentials.</p>
+                                            </div>
+                                        </div>
+                                        <!-- Service Item Start -->
+        
+                                        <!-- Service Item Start -->
+                                        <div class="service-item wow fadeInUp" data-wow-delay="0.2s">
+                                            <div class="icon-box">
+                                                <img src="{{asset('images/icon-services-2.svg')}}" alt="">
+                                            </div>
+        
+                                            <div>
+                                                <h3>Get Verified</h3>
+                                                <p>Complete our verification process to ensure patient safety and trust.</p>
+                                            </div>
+                                        </div>
+                                        <!-- Service Item Start -->
+
+                                        <!-- Service Item Start -->
+                                        <div class="service-item wow fadeInUp" data-wow-delay="0.2s">
+                                            <div class="icon-box">
+                                                <img src="{{asset('images/icon-services-2.svg')}}" alt="">
+                                            </div>
+        
+                                            <div>
+                                                <h3>Start Consulting</h3>
+                                                <p>Begin providing online therapy sessions and helping patients recover.</p>
+                                            </div>
+                                        </div>
+                                        <!-- Service Item Start -->
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- Our Potential Image Start -->
+                    {{-- <div class="our-potential-img">
+                        <figure class="image-anime reveal">
+                            <img src="{{asset('images/our-potential-img.jpg')}}" alt="">
+                        </figure>
+                    </div> --}}
+                    <!-- Our Potential Image End -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Our Potential End -->
 
     <!-- Our Service Start -->
     <div class="our-service bg-section">
@@ -550,86 +795,8 @@
     </div>
     <!-- Our Service End -->
 
-    <!-- Our Potential Start -->
-    <div class="our-potential">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-6">
-                    <!-- Our Potential Content Start -->
-                    <div class="our-potential-content">
-                        <!-- Section Title Start -->
-                        <div class="section-title">
-                            <h3 class="wow fadeInUp">who we are</h3>
-                            <h2 class="wow fadeInUp" data-wow-delay="0.25s">Unlock your potential<span> with our expertise</span></h2>
-                            <p class="wow fadeInUp" data-wow-delay="0.5s">Choosing us means partnering with experienced coaches who are dedicated to unlocking your potential. We offer personalized strategies, proven methods, and unwavering support to help you navigate challenges.</p>
-                        </div>
-                        <!-- Section Title End -->
-
-                        <!-- Our Potential Counter Start -->
-                        <div class="our-potential-counter">
-                            <!-- Potential Counter Item Start -->
-                            <div class="potential-counter-item">
-                                <div class="counter-circle">
-                                    <h2><span class="counter">98</span>%</h2>
-                                </div>
-                                <div class="potential-counter-content">
-                                    <h3>satisfied customers</h3>
-                                </div>
-                            </div>
-                            <!-- Potential Counter Item End -->
-
-                            <!-- Potential Counter Item Start -->
-                            <div class="potential-counter-item">
-                                <div class="counter-circle">
-                                    <h2><span class="counter">20</span>K</h2>
-                                </div>
-                                <div class="potential-counter-content">
-                                    <h3>projects completed</h3>
-                                </div>
-                            </div>
-                            <!-- Potential Counter Item End -->
-                        </div>
-                        <!-- Our Potential Counter End -->
-
-                        <!-- Our Potential Body Start -->
-                        <div class="our-potential-body">
-                            <!-- Potential Body Content Start -->
-                            <div class="potential-body-content">
-                                <h3 class="wow fadeInUp">certified and experienced coaching professionals</h3>
-                                <p class="wow fadeInUp" data-wow-delay="0.2s">Our team consists of highly trained and certified coaches who stay up-to-date with the latest coaching practices.</p>
-                            </div>
-                            <!-- Potential Body Content End -->
-
-                            <!-- Potential Body List Start -->
-                            <div class="potential-body-list wow fadeInUp" data-wow-delay="0.4s">
-                                <ul>
-                                    <li>continuous support and accountability</li>
-                                    <li>results-driven methods that deliver lasting change</li>
-                                </ul>
-                            </div>
-                            <!-- Potential Body List End -->
-                        </div>
-                        <!-- Our Potential Body End -->
-                    </div>
-                    <!-- Our Potential Content End -->
-                </div>
-
-                <div class="col-lg-6">
-                    <!-- Our Potential Image Start -->
-                    <div class="our-potential-img">
-                        <figure class="image-anime reveal">
-                            <img src="{{asset('images/our-potential-img.jpg')}}" alt="">
-                        </figure>
-                    </div>
-                    <!-- Our Potential Image End -->
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Our Potential End -->
-
     <!-- Our Pricing Section Start -->
-    <div class="our-pricing bg-section">
+    {{-- <div class="our-pricing bg-section">
         <div class="container">
             <div class="row">
                 <div class="col-lg-5">
@@ -771,11 +938,11 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
     <!-- Our Pricing Section End -->
 
     <!-- Our Expertise Section Start -->
-    <div class="our-expertise">
+    {{-- <div class="our-expertise">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-6">
@@ -907,11 +1074,11 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
     <!-- Our Expertise Section End -->
 
     <!-- Intro Video Section Start -->
-    <div class="intro-video bg-section parallaxie">
+    {{-- <div class="intro-video bg-section parallaxie">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-6 col-md-8">
@@ -951,7 +1118,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
     <!-- Intro Video Section End -->
 
     <!-- How We Work Section Start -->
@@ -961,8 +1128,8 @@
                 <div class="col-lg-6">
                     <!-- Section Title Start -->
                     <div class="section-title">
-                        <h3 class="wow fadeInUp">how we work</h3>
-                        <h2 class="wow fadeInUp" data-wow-delay="0.25s">Step by step process for <span>achieving success</span></h2>
+                        <h3 class="wow fadeInUp">Payment Flow</h3>
+                        <h2 class="wow fadeInUp" data-wow-delay="0.25s">Secure & Transparent <span>Payments</span></h2>
                     </div>
                     <!-- Section Title End -->
                 </div>
@@ -985,8 +1152,8 @@
                         </div>
 
                         <div class="how-work-content">
-                            <h3><span>01.</span> assessment</h3>
-                            <p>One on one sessions to achieve personal goals and enhance self awareness.</p>
+                            <h3><span>01.</span> Patients Pay</h3>
+                            <p>Patients securely pay through integrated payment gateways when booking appointments or ordering medicines.</p>
                         </div>
                     </div>
                     <!-- How Work Item End -->
@@ -1000,8 +1167,8 @@
                         </div>
 
                         <div class="how-work-content">
-                            <h3><span>02.</span> goal setting</h3>
-                            <p>One on one sessions to achieve personal goals and enhance self awareness.</p>
+                            <h3><span>02.</span> Recovery Processes</h3>
+                            <p>The Recovery platform manages transactions, deducts platform fees, and ensures secure handling of all payments.</p>
                         </div>
                     </div>
                     <!-- How Work Item End -->
@@ -1015,8 +1182,8 @@
                         </div>
 
                         <div class="how-work-content">
-                            <h3><span>03.</span> coaching sessions</h3>
-                            <p>One on one sessions to achieve personal goals and enhance self awareness.</p>
+                            <h3><span>03.</span> Doctors Get Paid</h3>
+                            <p>Verified doctors receive earnings directly in their registered bank accounts or wallets after successful consultations.</p>
                         </div>
                     </div>
                     <!-- How Work Item End -->
@@ -1030,8 +1197,8 @@
                         </div>
 
                         <div class="how-work-content">
-                            <h3><span>04.</span> ongoing support</h3>
-                            <p>One on one sessions to achieve personal goals and enhance self awareness.</p>
+                            <h3><span>04.</span> Full Transparency</h3>
+                            <p>Both patients and doctors can track their complete payment history directly inside the app.</p>
                         </div>
                     </div>
                     <!-- How Work Item End -->
@@ -1157,7 +1324,7 @@
                         <!-- Section Title Start -->
                         <div class="section-title">
                             <h3 class="wow fadeInUp">FAQ</h3>
-                            <h2 class="wow fadeInUp" data-wow-delay="0.25s">Your coaching questions <span>answered simply here</span></h2>
+                            <h2 class="wow fadeInUp" data-wow-delay="0.25s">Your questions <span>answered simply here</span></h2>
                         </div>
                         <!-- Section Title End -->
 
@@ -1211,12 +1378,12 @@
                             <div class="accordion-item wow fadeInUp">
                                 <h2 class="accordion-header" id="heading1">
                                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1" aria-expanded="true" aria-controls="collapse1">
-                                        What is a Life & Business Coach?
+                                        What is Recovery?
                                     </button>
                                 </h2>
                                 <div id="collapse1" class="accordion-collapse collapse" aria-labelledby="heading1" data-bs-parent="#faqaccordion">
                                     <div class="accordion-body">
-                                        <p>Coaching focuses on future goals, actionable steps, and personal development. While therapy often deals with healing past issues, coaching is more about improving present circumstances and building a path forward. Coaches do not diagnose or treat mental health conditions.</p>
+                                        <p>Recovery is a mental health platform where you can connect with licensed psychiatrists and therapists via secure video calls, get matched to the right professional through our smart form-based system, and conveniently order psychiatric medicines through our in-app pharmacy.</p>
                                     </div>
                                 </div>
                             </div>
@@ -1241,7 +1408,7 @@
                             <div class="accordion-item wow fadeInUp" data-wow-delay="0.4s">
                                 <h2 class="accordion-header" id="heading3">
                                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3" aria-expanded="false" aria-controls="collapse3">
-                                        Who can benefit from life and business coaching? 
+                                        How does the matching system work? 
                                     </button>
                                 </h2>
                                 <div id="collapse3" class="accordion-collapse collapse" aria-labelledby="heading3" data-bs-parent="#faqaccordion">
@@ -1485,7 +1652,7 @@
     <!-- Our Testimonial Section End -->
 
     <!-- Our Blog Section Start -->
-    <div class="our-blog">
+    {{-- <div class="our-blog">
         <div class="container">
             <div class="row">
                 <div class="col-lg-4">
@@ -1607,7 +1774,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
     <!-- Our Blog Section End -->
 
     <!-- Footer Start -->

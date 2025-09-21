@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DoctorInfo;
 use App\Models\PatientInfo;
 use App\Models\User;
+use App\Models\UserLanguage;
 use App\Models\UserQuestionnaire;
 use Illuminate\Http\Request;
 
@@ -13,7 +14,7 @@ class UserController extends Controller
 {
     public function index(Request $request) {
         $user = auth()->user();
-        $user = User::with('patientInfo', 'doctorInfo')->where('id', $user->id)->first();
+        $user = User::with('patientInfo', 'doctorInfo', 'questionnaires', 'userLanguages', 'reviews')->where('id', $user->id)->first();
         return response()->json(['data' => ['user' => $user]]);
     }
     public function update_profile(Request $request) {
@@ -30,13 +31,17 @@ class UserController extends Controller
                 $this->update_doctor($request);
             }
 
+            // Update Questionnaires
             $questionnaires = @$request->input('questionnaires');
             if($questionnaires) {
                 $this->add_questionnaires($request);
             }
 
+            // Update Languages
+            $this->change_user_language($request);
+
             // Get user with relations
-            $user = User::with('patientInfo', 'doctorInfo', 'questionnaires')->where('id', $user->id)->first();
+            $user = User::with('patientInfo', 'doctorInfo', 'questionnaires', 'userLanguages', 'reviews')->where('id', $user->id)->first();
             
             $user->update([
                 'name' => $request->name ?? $user->name,
@@ -64,7 +69,7 @@ class UserController extends Controller
             $patient = PatientInfo::create([
                 'user_id' => $user->id,
                 'looking_for' => $data['looking_for'] ?? null,
-                'completed' => $data['completed'] ?? 0,
+                'completed' => (int)$data['completed'] ?? 0,
                 'dob' => $data['dob'] ?? null,
                 'gender' => $data['gender'] ?? null,
                 'age' => $data['age'] ?? 0,
@@ -74,7 +79,7 @@ class UserController extends Controller
         } else {
             $patient->update([
                 'looking_for' => $data['looking_for'] ?? $patient->looking_for,
-                'completed' => $data['completed'] ?? $patient->completed,
+                'completed' => (int)$data['completed'] ?? (int)$patient->completed,
                 'dob' => $data['dob'] ?? $patient->dob,
                 'gender' => $data['gender'] ?? $patient->gender,
                 'age' => $data['age'] ?? $patient->age,
@@ -102,7 +107,7 @@ class UserController extends Controller
                 'gender' => $data['gender'] ?? null,
                 'age' => $data['age'],
                 'approved' => $data['approved'] ?? false,
-                'completed' => $data['completed'] ?? 0
+                'completed' => (int)$data['completed'] ?? 0
             ]);
         } else {
             $doctor->update([
@@ -115,11 +120,26 @@ class UserController extends Controller
                 'gender' => $data['gender'] ?? $doctor->gender,
                 'age' => $data['age'] ?? $doctor->age,
                 'approved' => $data['approved'] ?? $doctor->approved,
-                'completed' => $data['completed'] ?? $doctor->completed
+                'completed' => (int)$data['completed'] ?? (int)$doctor->completed
             ]);
         }
 
         return $doctor;
+    }
+
+    public function change_user_language(Request $request) {
+        $languages = $request->input('languages');
+        $user = auth()->user();
+        UserLanguage::where('user_id', $user->id)->delete();
+        
+        if(isset($languages)) {
+            foreach($languages as $language) {
+                UserLanguage::create([
+                    'user_id' => $user->id,
+                    'language' => $language
+                ]);
+            }
+        }
     }
 
     public function match_doctors_list(Request $request) {
@@ -243,9 +263,17 @@ class UserController extends Controller
             }
 
             $user = User::find($user->id);
-            $patientInfo = $user->patientInfo;
-            $patientInfo->completed = 1;
-            $patientInfo->save();
+            if($user->type === "patient") {
+                $patientInfo = $user->patientInfo;
+                $patientInfo->completed = 1;
+                $patientInfo->save();
+            }
+
+            if($user->type === "doctor") {
+                $doctorInfo = $user->doctorInfo;
+                $doctorInfo->completed = 1;
+                $doctorInfo->save();
+            }
 
             // Get the users all questionnaires
             $questionnaires = UserQuestionnaire::where('user_id', $user->id)->get();
