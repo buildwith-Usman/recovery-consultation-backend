@@ -12,9 +12,19 @@ class UserController extends Controller
         $user = User::with('patientInfo', 'doctorInfo')
         ->where('type', '!=', 'admin')
         ->orderBy('id', 'desc')->paginate(10);
+
         return response()->json([
-            'message' => 'Users list.',
-            'data' => $user
+            "message" => "Users list.",
+            "data" => $user->items(),
+            "errors" => null,
+            "pagination" => [
+            "total" => $user->total(),
+            "current_page" => $user->currentPage(),
+            "per_page" => $user->perPage(),
+            "last_page" => $user->lastPage(),
+            "from" => $user->firstItem(),
+            "to" => $user->lastItem()
+            ]
         ], 200);
     }
     public function approve(Request $request) {

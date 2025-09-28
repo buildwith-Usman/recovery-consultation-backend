@@ -14,6 +14,7 @@ class PatientController extends Controller
   {
     $specialization = $request->input('specialization');
     $language = $request->input('language');
+    $limit = $request->input('limit') ?? 10;
     try {
       // Example query to get doctors based on specialization
       $doctors = User::with(['doctorInfo', 'questionnaires', 'userLanguages', 'reviews'])
@@ -25,11 +26,19 @@ class PatientController extends Controller
             $q->where('language', $language);
           }
         })
-        ->where('type', 'doctor')->get();
+        ->where('type', 'doctor')->paginate($limit);
 
       return response()->json([
-        "message" => "Doctors retrieved successfully",
-        "data" => $doctors
+        "data" => $doctors->items(),
+        "errors" => null,
+        "pagination" => [
+          "total" => $doctors->total(),
+          "current_page" => $doctors->currentPage(),
+          "per_page" => $doctors->perPage(),
+          "last_page" => $doctors->lastPage(),
+          "from" => $doctors->firstItem(),
+          "to" => $doctors->lastItem()
+        ]
       ]);
     } catch (\Exception $e) {
       return response()->json([
@@ -117,14 +126,23 @@ class PatientController extends Controller
   public function appointments(Request $request)
   {
 
+    $limit = $request->input('limit') ?? 10;
     $user = auth()->user();
 
     try {
-      $appointments = Appointment::where('pat_user_id', $user->id)->orderBy('id', 'desc')->get();
+      $appointments = Appointment::where('pat_user_id', $user->id)->orderBy('id', 'desc')->paginate($limit);
 
       return response()->json([
-        'message' => 'Appointment list',
-        'data' => $appointments
+        "message" => "Appointment list",
+        "data" => $appointments->items(),
+        "pagination" => [
+          "total" => $appointments->total(),
+          "current_page" => $appointments->currentPage(),
+          "per_page" => $appointments->perPage(),
+          "last_page" => $appointments->lastPage(),
+          "from" => $appointments->firstItem(),
+          "to" => $appointments->lastItem()
+        ]
       ], 200);
     } catch (\Exception $e) {
       return response()->json([

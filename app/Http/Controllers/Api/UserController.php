@@ -144,6 +144,8 @@ class UserController extends Controller
     }
 
     public function match_doctors_list(Request $request) {
+
+        $limit = $request->input('limit') ?? 10;
         $user = User::with(['patientInfo', 'questionnaires'])->where('id', auth()->user()->id)->first();
 
         if($user->type !== "patient") {
@@ -227,12 +229,19 @@ class UserController extends Controller
         })
         ->where('type', 'doctor')
         ->where('is_verified', true)
-        ->get();
+        ->paginate($limit);
 
         return response()->json([
             'message' => 'Doctors ('.$looking_for.') list.',
-            'data' => [
-                'doctors' => $doctors
+            "data" => $doctors->items(),
+            "errors" => null,
+            "pagination" => [
+                "total" => $doctors->total(),
+                "current_page" => $doctors->currentPage(),
+                "per_page" => $doctors->perPage(),
+                "last_page" => $doctors->lastPage(),
+                "from" => $doctors->firstItem(),
+                "to" => $doctors->lastItem()
             ]
         ]);
     }
