@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Appointment;
 use App\Models\DoctorInfo;
 use App\Models\PatientInfo;
 use App\Models\User;
@@ -12,28 +13,30 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
         $user = auth()->user();
         $user = User::with('patientInfo', 'doctorInfo', 'questionnaires', 'userLanguages', 'reviews', 'file')->where('id', $user->id)->first();
         return response()->json(['data' => ['user' => $user]]);
     }
-    public function update_profile(Request $request) {
+    public function update_profile(Request $request)
+    {
         try {
             $user = auth()->user();
 
             // Update the patient's profile
-            if($user->type === "patient") {
+            if ($user->type === "patient") {
                 $this->update_patient($request);
             }
 
             // Update the doctor's profile
-            if($user->type === "doctor") {
+            if ($user->type === "doctor") {
                 $this->update_doctor($request);
             }
 
             // Update Questionnaires
             $questionnaires = @$request->input('questionnaires');
-            if($questionnaires) {
+            if ($questionnaires) {
                 $this->add_questionnaires($request);
             }
 
@@ -42,13 +45,13 @@ class UserController extends Controller
 
             // Get user with relations
             $user = User::with('patientInfo', 'doctorInfo', 'questionnaires', 'userLanguages', 'reviews')->where('id', $user->id)->first();
-            
+
             $user->update([
                 'name' => $request->name ?? $user->name,
                 'phone' => $request->phone ?? $user->phone,
                 'profile_image_id' => $request->file_id ?? $user->profile_image_id,
             ]);
-    
+
             return response()->json([
                 'message' => 'Profile updated successfully',
                 'data' => ['user' => $user]
@@ -62,7 +65,8 @@ class UserController extends Controller
         }
     }
 
-    public function update_patient($data) {
+    public function update_patient($data)
+    {
         $user = auth()->user();
         $patient = PatientInfo::where('user_id', $user->id)->first();
 
@@ -70,7 +74,7 @@ class UserController extends Controller
             $patient = PatientInfo::create([
                 'user_id' => $user->id,
                 'looking_for' => $data['looking_for'] ?? null,
-                'completed' => (int)$data['completed'] ?? 0,
+                'completed' => (int) $data['completed'] ?? 0,
                 'dob' => $data['dob'] ?? null,
                 'gender' => $data['gender'] ?? null,
                 'age' => $data['age'] ?? 0,
@@ -80,7 +84,7 @@ class UserController extends Controller
         } else {
             $patient->update([
                 'looking_for' => $data['looking_for'] ?? $patient->looking_for,
-                'completed' => (int)$data['completed'] ?? (int)$patient->completed,
+                'completed' => (int) $data['completed'] ?? (int) $patient->completed,
                 'dob' => $data['dob'] ?? $patient->dob,
                 'gender' => $data['gender'] ?? $patient->gender,
                 'age' => $data['age'] ?? $patient->age,
@@ -92,7 +96,8 @@ class UserController extends Controller
         return $patient;
     }
 
-    public function update_doctor($data) {
+    public function update_doctor($data)
+    {
         $user = auth()->user();
         $doctor = DoctorInfo::where('user_id', $user->id)->first();
 
@@ -108,7 +113,7 @@ class UserController extends Controller
                 'gender' => $data['gender'] ?? null,
                 'age' => $data['age'],
                 'approved' => $data['approved'] ?? false,
-                'completed' => (int)$data['completed'] ?? 0
+                'completed' => (int) $data['completed'] ?? 0
             ]);
         } else {
             $doctor->update([
@@ -121,20 +126,21 @@ class UserController extends Controller
                 'gender' => $data['gender'] ?? $doctor->gender,
                 'age' => $data['age'] ?? $doctor->age,
                 'approved' => $data['approved'] ?? $doctor->approved,
-                'completed' => (int)$data['completed'] ?? (int)$doctor->completed
+                'completed' => (int) $data['completed'] ?? (int) $doctor->completed
             ]);
         }
 
         return $doctor;
     }
 
-    public function change_user_language(Request $request) {
+    public function change_user_language(Request $request)
+    {
         $languages = $request->input('languages');
         $user = auth()->user();
         UserLanguage::where('user_id', $user->id)->delete();
-        
-        if(isset($languages)) {
-            foreach($languages as $language) {
+
+        if (isset($languages)) {
+            foreach ($languages as $language) {
                 UserLanguage::create([
                     'user_id' => $user->id,
                     'language' => $language
@@ -143,110 +149,8 @@ class UserController extends Controller
         }
     }
 
-    public function match_doctors_list(Request $request) {
-
-        $limit = $request->input('limit') ?? 10;
-        $user = User::with(['patientInfo', 'questionnaires'])->where('id', auth()->user()->id)->first();
-
-        if($user->type !== "patient") {
-            return response()->json([
-                'message' => 'User is not valid!',
-                'data' => [
-                    'doctors' => []
-                ]
-            ], 404);
-        }
-
-        $looking_for = $user->patientInfo->looking_for ?? null;
-
-        $gender_prefer_data = $user->questionnaires
-            ->where('key', 'gender_prefer')
-            ->pluck('answer')->first();
-
-        $age_group_prefer = $user->questionnaires
-            ->where('key', 'age_group_prefer')
-            ->pluck('answer')->first();
-
-        $age_prefer = $user->questionnaires
-            ->where('key', 'age_prefer')
-            ->pluck('answer')->first();
-        $min_age_prefer = null;
-        $max_age_prefer = null;
-
-        if(str_contains($age_prefer, '-')) {
-            $age_prefer_arr = explode('-', $age_prefer);
-            $min_age_prefer = (int)$age_prefer_arr[0];
-            $max_age_prefer = (int)$age_prefer_arr[1];
-        } else if(str_contains($age_prefer, '+')) {
-            $min_age_prefer = (int)str_replace('+', '', $age_prefer);
-        } else if(str_contains($age_prefer, '<')) {
-            $max_age_prefer = (int)str_replace('<', '', $age_prefer);
-        }
-
-        $lang_prefer = $user->questionnaires
-            ->where('key', 'lang_prefer')
-            ->pluck('answer')->first();
-
-        $help_support = $user->questionnaires
-            ->where('key', 'help_support')
-            ->pluck('answer')->first();
-
-        $doctors = User::with(['doctorInfo', 'questionnaires'])
-        ->whereHas('doctorInfo', function ($q) use($looking_for, $gender_prefer_data, $min_age_prefer, $max_age_prefer) {
-            $q->where('specialization', $looking_for);
-            if($gender_prefer_data) {
-                $q->where('gender', strtolower($gender_prefer_data));
-            }
-            if($min_age_prefer && $max_age_prefer) {
-                $q->whereBetween('age', [(int)$min_age_prefer, (int)$max_age_prefer]);
-            } else if($min_age_prefer && empty($max_age_prefer)) {
-                $q->where('age', '>=', $min_age_prefer);
-            } else if(empty($min_age_prefer) && $max_age_prefer) {
-                $q->where('age', '<=', $max_age_prefer);
-            }
-            $q->where('approved', 1);
-        })
-        ->whereHas('questionnaires', function ($q) use($age_group_prefer, $help_support) {
-            $q->where(function ($query) use ($age_group_prefer, $help_support) {
-                if($age_group_prefer) {
-                    $query->orWhere('key', 'age_group_prefer')
-                        ->whereRaw('FIND_IN_SET(?, answer)', [$age_group_prefer]);
-                }
-                if($help_support) {
-                    $helpSupportArr = explode(',', $help_support);
-                    foreach ($helpSupportArr as $support) {
-                        $query->orWhere(function ($sub) use ($support) {
-                            $sub->where('key', 'help_support')
-                                ->whereRaw('FIND_IN_SET(?, answer)', [$support]);
-                        });
-                    }
-                }
-            });
-        })
-        ->whereHas('userLanguages', function($q) use($lang_prefer) {
-            $languageArr = explode(',', $lang_prefer);
-            $q->whereIn('language', $languageArr);
-        })
-        ->where('type', 'doctor')
-        ->where('is_verified', true)
-        ->paginate($limit);
-
-        return response()->json([
-            'message' => 'Doctors ('.$looking_for.') list.',
-            "data" => $doctors->items(),
-            "errors" => null,
-            "pagination" => [
-                "total" => $doctors->total(),
-                "current_page" => $doctors->currentPage(),
-                "per_page" => $doctors->perPage(),
-                "last_page" => $doctors->lastPage(),
-                "from" => $doctors->firstItem(),
-                "to" => $doctors->lastItem()
-            ]
-        ]);
-    }
-
-    public function add_questionnaires(Request $request) {
+    public function add_questionnaires(Request $request)
+    {
         $user = auth()->user();
         $questionnaires = $request->input('questionnaires');
 
@@ -266,20 +170,20 @@ class UserController extends Controller
                 UserQuestionnaire::create([
                     'user_id' => $user->id,
                     'question' => $questionnaire['question'],
-                    'options' => implode(',',$questionnaire['options']),
+                    'options' => implode(',', $questionnaire['options']),
                     'answer' => is_array($questionnaire['answer']) ? implode(',', $questionnaire['answer']) : $questionnaire['answer'],
                     'key' => $questionnaire['key']
                 ]);
             }
 
             $user = User::find($user->id);
-            if($user->type === "patient") {
+            if ($user->type === "patient") {
                 $patientInfo = $user->patientInfo;
                 $patientInfo->completed = 1;
                 $patientInfo->save();
             }
 
-            if($user->type === "doctor") {
+            if ($user->type === "doctor") {
                 $doctorInfo = $user->doctorInfo;
                 $doctorInfo->completed = 1;
                 $doctorInfo->save();
@@ -298,6 +202,113 @@ class UserController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Registration failed',
+                'errors' => [$e->getMessage()]
+            ], 500);
+        }
+    }
+
+    public function doctor_details(Request $request)
+    {
+        $id = $request->input('id');
+        try {
+            $doctor = User::with([
+                'doctorInfo',
+                'questionnaires',
+                'userLanguages',
+                'reviews' => function ($query) {
+                    $query->latest()->limit(5);
+                }
+            ])
+                ->withCount('doc_appointments')
+                ->where([
+                    'id' => $id,
+                    'type' => 'doctor'
+                ])
+                ->first();
+            $doctor->total_rating = $doctor->reviews->avg('rating') ?? 0;
+            return response()->json([
+                "message" => "Doctor retrieved successfully",
+                "data" => $doctor
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to retrieve doctor',
+                'errors' => [$e->getMessage()]
+            ], 500);
+        } catch (\Throwable $th) {
+            // Log the error or handle it as needed
+            return response()->json([
+                "message" => "Failed to retrieve doctor",
+                "errors" => [$th->getMessage()]
+            ], 500);
+        }
+    }
+
+    public function appointments(Request $request)
+    {
+        $limit = $request->input('limit') ?? 10;
+        $purpose = $request->input('purpose');
+        $user = auth()->user();
+
+        try {
+            $appointments = Appointment::with(['patient', 'doctor'])
+                ->where(function ($q) use ($user, $purpose) {
+
+                    if ($user->type === "doctor") {
+                        $q->where('doc_user_id', $user->id);
+                    } else if ($user->type === "patient") {
+                        $q->where('pat_user_id', $user->id);
+                    }
+
+                    if ($purpose) {
+                        $q->where('status', $purpose);
+                    }
+                })
+                ->orderBy('id', 'desc')->paginate($limit);
+
+            return response()->json([
+                "message" => "Appointment list",
+                "data" => $appointments->items(),
+                "pagination" => [
+                    "total" => $appointments->total(),
+                    "current_page" => $appointments->currentPage(),
+                    "per_page" => $appointments->perPage(),
+                    "last_page" => $appointments->lastPage(),
+                    "from" => $appointments->firstItem(),
+                    "to" => $appointments->lastItem()
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Registration failed',
+                'errors' => [$e->getMessage()]
+            ], 500);
+        }
+    }
+
+    public function reviews(Request $request)
+    {
+        $limit = $request->input('limit') ?? 10;
+        $user = auth()->user();
+
+        try {
+            $reviews = $user->reviews()->with(['sender', 'receiver'])->latest()->paginate($limit);
+
+            return response()->json([
+                "message" => "Reviews list",
+                "data" => $reviews->items(),
+                "pagination" => [
+                    "total" => $reviews->total(),
+                    "current_page" => $reviews->currentPage(),
+                    "per_page" => $reviews->perPage(),
+                    "last_page" => $reviews->lastPage(),
+                    "from" => $reviews->firstItem(),
+                    "to" => $reviews->lastItem()
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to retrieve reviews',
                 'errors' => [$e->getMessage()]
             ], 500);
         }

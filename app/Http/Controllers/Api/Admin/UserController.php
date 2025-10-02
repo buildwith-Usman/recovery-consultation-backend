@@ -9,9 +9,24 @@ use Illuminate\Http\Request;
 class UserController extends Controller
 {
     public function allUsers(Request $request) {
+
+        $limit = $request->input('limit') ?? 10;
+        $type = $request->input('type');
+        $specialization = $request->input('specialization');
+
         $user = User::with('patientInfo', 'doctorInfo')
+        ->where(function ($q) use($type) {
+            if($type) {
+                $q->where('type', $type);
+            }
+        })
+        ->when($type === 'doctor' && $specialization, function ($q) use($specialization) {
+            $q->whereHas('doctorInfo', function ($query) use($specialization) {
+                $query->where('specialization', $specialization);
+            });
+        })
         ->where('type', '!=', 'admin')
-        ->orderBy('id', 'desc')->paginate(10);
+        ->orderBy('id', 'desc')->paginate($limit);
 
         return response()->json([
             "message" => "Users list.",

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\DoctorController;
 use App\Http\Controllers\Api\FileUploadController;
 use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\PatientController;
@@ -47,13 +48,20 @@ Route::name('api.')->group(function () {
         Route::post('/update-profile', [UserController::class, 'update_profile'])->name('user.update_profile');
         Route::post('add-questionnaires', [UserController::class, 'add_questionnaires'])->name('questionnaires.add');
 
-        // Patient's doctors endpoints
-        Route::get('match-doctors-list', [UserController::class, 'match_doctors_list'])->name('match.doctors.list');
-        Route::get('doctors-list', [PatientController::class, 'doctors_list'])->name('doctors.list');
-        Route::get('doctor', [PatientController::class, 'doctor_details'])->name('doctor.details');
-        Route::post('appointment-booking', [PatientController::class, 'appointment_booking'])->name('appointment.booking');
-        Route::post('appointments-list', [PatientController::class, 'appointments'])->name('appointments');
-        Route::post('add-reviews', [PatientController::class, 'add_reviews'])->name('reviews.add');
+        // Patient's endpoints
+        Route::get('match-doctors-list', [PatientController::class, 'match_doctors_list'])->name('patient.match.doctors.list');
+        Route::get('doctors-list', [PatientController::class, 'doctors_list'])->name('patient.doctors.list');
+        Route::post('appointment-booking', [PatientController::class, 'appointment_booking'])->name('patient.appointment.booking');
+        Route::post('add-reviews', [PatientController::class, 'add_reviews'])->name('patient.reviews.add');
+
+        // Doctor's endpoints
+        Route::get('patients', [DoctorController::class, 'patients'])->name('doctor.patients');
+        Route::get('patient-history', [DoctorController::class, 'patient_history'])->name('doctor.patient.history');
+
+        // For Users (Patients and Doctors) endpoints
+        Route::get('doctor', [UserController::class, 'doctor_details'])->name('doctor.details');
+        Route::post('appointments-list', [UserController::class, 'appointments'])->name('appointments');
+        Route::get('reviews', [UserController::class, 'reviews'])->name('reviews');
 
         // Admin endpoints
         Route::middleware(['auth.admin'])->prefix('admin')->group(function () {

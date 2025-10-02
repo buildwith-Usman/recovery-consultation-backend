@@ -78,4 +78,8 @@ class User extends Authenticatable
     public function file() {
         return $this->belongsTo(File::class, 'profile_image_id');
     }
+
+    public function doc_appointments() {
+        return $this->hasMany(Appointment::class, 'doc_user_id');
+    }
 }

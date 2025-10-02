@@ -21,4 +21,12 @@ class Appointment extends Model
         'end_time_in_secconds',
         'price'
     ];
+
+    public function patient() {
+        return $this->belongsTo(User::class, 'pat_user_id');
+    }
+
+    public function doctor() {
+        return $this->belongsTo(User::class, 'doc_user_id');
+    }
 }

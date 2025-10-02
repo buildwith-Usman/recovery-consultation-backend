@@ -10,6 +10,111 @@ use Illuminate\Http\Request;
 
 class PatientController extends Controller
 {
+
+  public function match_doctors_list(Request $request)
+  {
+
+    $limit = $request->input('limit') ?? 10;
+    $user = User::with(['patientInfo', 'questionnaires'])->where('id', auth()->user()->id)->first();
+
+    if ($user->type !== "patient") {
+      return response()->json([
+        'message' => 'User is not valid!',
+        'data' => [
+          'doctors' => []
+        ]
+      ], 404);
+    }
+
+    $looking_for = $user->patientInfo->looking_for ?? null;
+
+    $gender_prefer_data = $user->questionnaires
+      ->where('key', 'gender_prefer')
+      ->pluck('answer')->first();
+
+    $age_group_prefer = $user->questionnaires
+      ->where('key', 'age_group_prefer')
+      ->pluck('answer')->first();
+
+    $age_prefer = $user->questionnaires
+      ->where('key', 'age_prefer')
+      ->pluck('answer')->first();
+    $min_age_prefer = null;
+    $max_age_prefer = null;
+
+    if (str_contains($age_prefer, '-')) {
+      $age_prefer_arr = explode('-', $age_prefer);
+      $min_age_prefer = (int) $age_prefer_arr[0];
+      $max_age_prefer = (int) $age_prefer_arr[1];
+    } else if (str_contains($age_prefer, '+')) {
+      $min_age_prefer = (int) str_replace('+', '', $age_prefer);
+    } else if (str_contains($age_prefer, '<')) {
+      $max_age_prefer = (int) str_replace('<', '', $age_prefer);
+    }
+
+    $lang_prefer = $user->questionnaires
+      ->where('key', 'lang_prefer')
+      ->pluck('answer')->first();
+
+    $help_support = $user->questionnaires
+      ->where('key', 'help_support')
+      ->pluck('answer')->first();
+
+    $doctors = User::with(['doctorInfo', 'questionnaires'])
+      ->whereHas('doctorInfo', function ($q) use ($looking_for, $gender_prefer_data, $min_age_prefer, $max_age_prefer) {
+        $q->where('specialization', $looking_for);
+        if ($gender_prefer_data) {
+          $q->where('gender', strtolower($gender_prefer_data));
+        }
+        if ($min_age_prefer && $max_age_prefer) {
+          $q->whereBetween('age', [(int) $min_age_prefer, (int) $max_age_prefer]);
+        } else if ($min_age_prefer && empty($max_age_prefer)) {
+          $q->where('age', '>=', $min_age_prefer);
+        } else if (empty($min_age_prefer) && $max_age_prefer) {
+          $q->where('age', '<=', $max_age_prefer);
+        }
+        $q->where('approved', 1);
+      })
+      ->whereHas('questionnaires', function ($q) use ($age_group_prefer, $help_support) {
+        $q->where(function ($query) use ($age_group_prefer, $help_support) {
+          if ($age_group_prefer) {
+            $query->orWhere('key', 'age_group_prefer')
+              ->whereRaw('FIND_IN_SET(?, answer)', [$age_group_prefer]);
+          }
+          if ($help_support) {
+            $helpSupportArr = explode(',', $help_support);
+            foreach ($helpSupportArr as $support) {
+              $query->orWhere(function ($sub) use ($support) {
+                $sub->where('key', 'help_support')
+                  ->whereRaw('FIND_IN_SET(?, answer)', [$support]);
+              });
+            }
+          }
+        });
+      })
+      ->whereHas('userLanguages', function ($q) use ($lang_prefer) {
+        $languageArr = explode(',', $lang_prefer);
+        $q->whereIn('language', $languageArr);
+      })
+      ->where('type', 'doctor')
+      ->where('is_verified', true)
+      ->paginate($limit);
+
+    return response()->json([
+      'message' => 'Doctors (' . $looking_for . ') list.',
+      "data" => $doctors->items(),
+      "errors" => null,
+      "pagination" => [
+        "total" => $doctors->total(),
+        "current_page" => $doctors->currentPage(),
+        "per_page" => $doctors->perPage(),
+        "last_page" => $doctors->lastPage(),
+        "from" => $doctors->firstItem(),
+        "to" => $doctors->lastItem()
+      ]
+    ]);
+  }
+
   public function doctors_list(Request $request)
   {
     $specialization = $request->input('specialization');
@@ -49,34 +154,6 @@ class PatientController extends Controller
       // Log the error or handle it as needed
       return response()->json([
         "message" => "Failed to retrieve doctors",
-        "errors" => [$th->getMessage()]
-      ], 500);
-    }
-  }
-
-  public function doctor_details(Request $request)
-  {
-    $id = $request->input('id');
-    try {
-      $doctor = User::with(['doctorInfo', 'questionnaires', 'userLanguages', 'reviews'])->where([
-        'id' => $id,
-        'type' => 'doctor'
-      ])
-        ->first();
-      $doctor->total_rating = $doctor->reviews->avg('rating') ?? 0;
-      return response()->json([
-        "message" => "Doctor retrieved successfully",
-        "data" => $doctor
-      ]);
-    } catch (\Exception $e) {
-      return response()->json([
-        'message' => 'Failed to retrieve doctor',
-        'errors' => [$e->getMessage()]
-      ], 500);
-    } catch (\Throwable $th) {
-      // Log the error or handle it as needed
-      return response()->json([
-        "message" => "Failed to retrieve doctor",
         "errors" => [$th->getMessage()]
       ], 500);
     }
@@ -123,35 +200,6 @@ class PatientController extends Controller
     }
   }
 
-  public function appointments(Request $request)
-  {
-
-    $limit = $request->input('limit') ?? 10;
-    $user = auth()->user();
-
-    try {
-      $appointments = Appointment::where('pat_user_id', $user->id)->orderBy('id', 'desc')->paginate($limit);
-
-      return response()->json([
-        "message" => "Appointment list",
-        "data" => $appointments->items(),
-        "pagination" => [
-          "total" => $appointments->total(),
-          "current_page" => $appointments->currentPage(),
-          "per_page" => $appointments->perPage(),
-          "last_page" => $appointments->lastPage(),
-          "from" => $appointments->firstItem(),
-          "to" => $appointments->lastItem()
-        ]
-      ], 200);
-    } catch (\Exception $e) {
-      return response()->json([
-        'message' => 'Registration failed',
-        'errors' => [$e->getMessage()]
-      ], 500);
-    }
-  }
-
   public function add_reviews(Request $request)
   {
     try {
@@ -163,14 +211,14 @@ class PatientController extends Controller
 
       $user = auth()->user();
 
-      $check = Appointment::where(function ($q) use($user) {
+      $check = Appointment::where(function ($q) use ($user) {
         $q->orWhere('pat_user_id', $user->id);
         $q->orWhere('doc_user_id', $user->id);
       })->first();
 
-      if(!$check) {
+      if (!$check) {
         return response()->json([
-        'message' => 'Validation failed',
+          'message' => 'Validation failed',
           'errors' => ['Appointment Id isn\'t valid!']
         ], 422);
       }
