@@ -54,14 +54,15 @@ class UserController extends Controller
             $this->change_user_language($request);
 
             // Get user with relations
-            $user = User::with($this->user_relational_array)->where('id', $user->id)->first();
+            $user = User::where('id', $user->id)->first();
 
             $user->update([
                 'name' => $request->name ?? $user->name,
                 'phone' => $request->phone ?? $user->phone,
-                'profile_image_id' => $request->file_id ?? $user->profile_image_id,
+                'profile_image_id' => $request->file_id ? $request->file_id : $user->profile_image_id,
             ]);
 
+            $user = User::with($this->user_relational_array)->where('id', $user->id)->first();
             return response()->json([
                 'message' => 'Profile updated successfully',
                 'data' => ['user' => $user]
@@ -147,9 +148,8 @@ class UserController extends Controller
     {
         $languages = $request->input('languages');
         $user = auth()->user();
-        UserLanguage::where('user_id', $user->id)->delete();
-
         if (isset($languages)) {
+            UserLanguage::where('user_id', $user->id)->delete();
             foreach ($languages as $language) {
                 UserLanguage::create([
                     'user_id' => $user->id,
