@@ -15,7 +15,7 @@ class PatientController extends Controller
   {
 
     $limit = $request->input('limit') ?? 10;
-    $user = User::with(['patientInfo', 'questionnaires'])->where('id', auth()->user()->id)->first();
+    $user = User::with(['patientInfo', 'file', 'questionnaires'])->where('id', auth()->user()->id)->first();
 
     if ($user->type !== "patient") {
       return response()->json([
@@ -60,7 +60,7 @@ class PatientController extends Controller
       ->where('key', 'help_support')
       ->pluck('answer')->first();
 
-    $doctors = User::with(['doctorInfo', 'questionnaires'])
+    $doctors = User::with(['doctorInfo', 'file', 'questionnaires'])
       ->whereHas('doctorInfo', function ($q) use ($looking_for, $gender_prefer_data, $min_age_prefer, $max_age_prefer) {
         $q->where('specialization', $looking_for);
         if ($gender_prefer_data) {
@@ -122,7 +122,7 @@ class PatientController extends Controller
     $limit = $request->input('limit') ?? 10;
     try {
       // Example query to get doctors based on specialization
-      $doctors = User::with(['doctorInfo', 'questionnaires', 'userLanguages', 'reviews'])
+      $doctors = User::with(['doctorInfo', 'file', 'questionnaires', 'userLanguages', 'reviews'])
         ->whereHas('doctorInfo', function ($query) use ($specialization) {
           $query->where('specialization', $specialization);
         })

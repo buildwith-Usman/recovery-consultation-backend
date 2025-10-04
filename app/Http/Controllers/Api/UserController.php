@@ -9,14 +9,24 @@ use App\Models\PatientInfo;
 use App\Models\User;
 use App\Models\UserLanguage;
 use App\Models\UserQuestionnaire;
+use App\Models\UserReview;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+    private $user_relational_array = [
+        'patientInfo',
+        'doctorInfo',
+        'questionnaires',
+        'userLanguages',
+        'file'
+    ];
     public function index(Request $request)
     {
         $user = auth()->user();
-        $user = User::with('patientInfo', 'doctorInfo', 'questionnaires', 'userLanguages', 'reviews', 'file')->where('id', $user->id)->first();
+        $user = User::with(array_merge($this->user_relational_array, ['reviews' => function ($query) {
+            $query->latest()->limit(5);
+        }]))->where('id', $user->id)->first();
         return response()->json(['data' => ['user' => $user]]);
     }
     public function update_profile(Request $request)
@@ -44,7 +54,7 @@ class UserController extends Controller
             $this->change_user_language($request);
 
             // Get user with relations
-            $user = User::with('patientInfo', 'doctorInfo', 'questionnaires', 'userLanguages', 'reviews')->where('id', $user->id)->first();
+            $user = User::with($this->user_relational_array)->where('id', $user->id)->first();
 
             $user->update([
                 'name' => $request->name ?? $user->name,
@@ -211,14 +221,14 @@ class UserController extends Controller
     {
         $id = $request->input('id');
         try {
-            $doctor = User::with([
-                'doctorInfo',
-                'questionnaires',
-                'userLanguages',
-                'reviews' => function ($query) {
-                    $query->latest()->limit(5);
-                }
-            ])
+            $doctor = User::with(array_merge(
+                $this->user_relational_array, 
+                [
+                    'reviews' => function ($query) {
+                        $query->latest()->limit(5);
+                    }
+                ]
+                ))
                 ->withCount('doc_appointments')
                 ->where([
                     'id' => $id,
@@ -251,20 +261,27 @@ class UserController extends Controller
         $user = auth()->user();
 
         try {
-            $appointments = Appointment::with(['patient', 'doctor'])
-                ->where(function ($q) use ($user, $purpose) {
+            $appointments = Appointment::with([
+                'patient' => function ($q) {
+                    $q->with($this->user_relational_array);
+                },
+                'doctor' => function ($q) {
+                    $q->with($this->user_relational_array);
+                }
+            ])
+            ->where(function ($q) use ($user, $purpose) {
 
-                    if ($user->type === "doctor") {
-                        $q->where('doc_user_id', $user->id);
-                    } else if ($user->type === "patient") {
-                        $q->where('pat_user_id', $user->id);
-                    }
+                if ($user->type === "doctor") {
+                    $q->where('doc_user_id', $user->id);
+                } else if ($user->type === "patient") {
+                    $q->where('pat_user_id', $user->id);
+                }
 
-                    if ($purpose) {
-                        $q->where('status', $purpose);
-                    }
-                })
-                ->orderBy('id', 'desc')->paginate($limit);
+                if ($purpose) {
+                    $q->where('status', $purpose);
+                }
+            })
+            ->orderBy('id', 'desc')->paginate($limit);
 
             return response()->json([
                 "message" => "Appointment list",
@@ -289,10 +306,20 @@ class UserController extends Controller
     public function reviews(Request $request)
     {
         $limit = $request->input('limit') ?? 10;
+        $user_id = $request->input('user_id') ?? 10;
         $user = auth()->user();
 
         try {
-            $reviews = $user->reviews()->with(['sender', 'receiver'])->latest()->paginate($limit);
+            $reviews = UserReview::with([
+                'sender'=>  function ($q) {
+                    $q->with($this->user_relational_array);
+                },
+                'receiver' => function ($q) {
+                    $q->with($this->user_relational_array);
+                }
+            ])
+            ->where('receiver_id', !empty($user_id) ? $user_id : $user->id)
+            ->latest()->paginate($limit);
 
             return response()->json([
                 "message" => "Reviews list",

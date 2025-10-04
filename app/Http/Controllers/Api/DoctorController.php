@@ -47,7 +47,9 @@ class DoctorController extends Controller
     $user = auth()->user();
     
     try {
-      $patients = Appointment::with('patient')->where('doc_user_id', $user->id)
+      $patients = Appointment::with(['patient' => function ($q) {
+        $q->with(['patientInfo', 'doctorInfo', 'questionnaires', 'userLanguages', 'file']);
+      }])->where('doc_user_id', $user->id)
       ->where('pat_user_id', $patient_id)
       ->paginate($limit);
 
