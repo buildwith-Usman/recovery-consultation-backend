@@ -19,7 +19,8 @@ class UserController extends Controller
         'doctorInfo',
         'questionnaires',
         'userLanguages',
-        'file'
+        'file',
+        'available_times'
     ];
     public function index(Request $request)
     {
