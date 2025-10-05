@@ -73,7 +73,7 @@ class PatientController extends Controller
         } else if (empty($min_age_prefer) && $max_age_prefer) {
           $q->where('age', '<=', $max_age_prefer);
         }
-        $q->where('approved', 1);
+        $q->where('status', 'approved');
       })
       ->whereHas('questionnaires', function ($q) use ($age_group_prefer, $help_support) {
         $q->where(function ($query) use ($age_group_prefer, $help_support) {

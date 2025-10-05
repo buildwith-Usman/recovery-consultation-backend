@@ -123,7 +123,7 @@ class UserController extends Controller
                 'country_id' => $data['country_id'] ?? null,
                 'gender' => $data['gender'] ?? null,
                 'age' => $data['age'],
-                'approved' => $data['approved'] ?? false,
+                'status' => $data['status'] ?? false,
                 'completed' => (int) $data['completed'] ?? 0
             ]);
         } else {
@@ -136,7 +136,7 @@ class UserController extends Controller
                 'country_id' => $data['country_id'] ?? $doctor->country_id,
                 'gender' => $data['gender'] ?? $doctor->gender,
                 'age' => $data['age'] ?? $doctor->age,
-                'approved' => $data['approved'] ?? $doctor->approved,
+                'status' => $data['status'] ?? $doctor->status,
                 'completed' => (int) $data['completed'] ?? (int) $doctor->completed
             ]);
         }

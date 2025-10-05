@@ -28,8 +28,10 @@ class DoctorInfo extends Model
         'country_id',
         'gender',
         'age',
-        'approved',
-        'completed'
+        'commision_type',
+        'commision_value',
+        'completed',
+        'status'
     ];
 
     /**
