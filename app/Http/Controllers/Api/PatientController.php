@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\User;
+use App\Models\UserAvailableTime;
 use App\Models\UserReview;
 use Illuminate\Http\Request;
 
@@ -163,25 +164,87 @@ class PatientController extends Controller
   {
     try {
       $request->validate([
-        'pat_user_id' => 'required',
-        'doc_user_id' => 'required',
-        'date' => 'required',
-        'start_time' => 'required',
-        'end_time' => 'required',
-        'price' => 'required'
+        'doc_user_id' => 'required|exists:users,id',
+        'date' => 'required|date',
+        'user_available_time_id' => 'required|exists:user_available_times,id'
       ]);
 
-      $data = $request->all();
+      // Get authenticated patient
+      $patientId = auth()->user()->id;
 
-      $data['start_time_in_secconds'] = strtotime($request->date . ' ' . $request->start_time);
-      $data['end_time_in_secconds'] = strtotime($request->date . ' ' . $request->start_time);
+      // Verify the doctor exists and is a doctor
+      $doctor = User::with('doctorInfo')->find($request->doc_user_id);
+      if (!$doctor || $doctor->type !== 'doctor') {
+        return response()->json([
+          'message' => 'Invalid doctor',
+          'errors' => ['The selected doctor is not valid']
+        ], 422);
+      }
 
-      $appointment = Appointment::create($data);
+      // Get the doctor's available time slot
+      $availableTime = UserAvailableTime::where('id', $request->user_available_time_id)
+        ->where('user_id', $request->doc_user_id)
+        ->where('status', 'available')
+        ->first();
+
+      if (!$availableTime) {
+        return response()->json([
+          'message' => 'Time slot not available',
+          'errors' => ['The selected time slot is not available for this doctor']
+        ], 422);
+      }
+
+      // Check if the requested date matches the weekday of the available time
+      $requestedWeekday = strtolower(date('l', strtotime($request->date)));
+      if ($availableTime->weekday !== $requestedWeekday) {
+        return response()->json([
+          'message' => 'Invalid date',
+          'errors' => ['The selected date does not match the available time slot weekday']
+        ], 422);
+      }
+
+      // Check for conflicting appointments
+      $conflictingAppointment = Appointment::where('doc_user_id', $request->doc_user_id)
+        ->where('date', $request->date)
+        ->where(function ($query) use ($availableTime) {
+          $query->whereBetween('start_time', [$availableTime->start_time, $availableTime->end_time])
+            ->orWhereBetween('end_time', [$availableTime->start_time, $availableTime->end_time])
+            ->orWhere(function ($q) use ($availableTime) {
+              $q->where('start_time', '<=', $availableTime->start_time)
+                ->where('end_time', '>=', $availableTime->end_time);
+            });
+        })
+        ->exists();
+
+      if ($conflictingAppointment) {
+        return response()->json([
+          'message' => 'Time slot already booked',
+          'errors' => ['This time slot is already booked for the selected date']
+        ], 422);
+      }
+
+      // Get price from doctor info
+      $price = $doctor->doctorInfo->price ?? 0;
+
+      // Create appointment
+      $appointment = Appointment::create([
+        'pat_user_id' => $patientId,
+        'doc_user_id' => $request->doc_user_id,
+        'date' => $request->date,
+        'start_time' => $availableTime->start_time,
+        'end_time' => $availableTime->end_time,
+        'start_time_in_secconds' => strtotime($request->date . ' ' . $availableTime->start_time),
+        'end_time_in_secconds' => strtotime($request->date . ' ' . $availableTime->end_time),
+        'price' => $price
+      ]);
+
+      // Load relationships for response
+      $appointment->load(['patient', 'doctor']);
 
       return response()->json([
-        'message' => 'Appointment created.',
+        'message' => 'Appointment booked successfully',
         'data' => $appointment
-      ]);
+      ], 201);
 
     } catch (\Illuminate\Validation\ValidationException $e) {
       $errorsList = [];
@@ -194,7 +257,7 @@ class PatientController extends Controller
       ], 422);
     } catch (\Exception $e) {
       return response()->json([
-        'message' => 'Registration failed',
+        'message' => 'Appointment booking failed',
         'errors' => [$e->getMessage()]
       ], 500);
     }
