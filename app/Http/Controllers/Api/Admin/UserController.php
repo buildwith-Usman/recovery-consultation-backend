@@ -33,7 +33,9 @@ class UserController extends Controller
 
         return response()->json([
             "message" => "Users list.",
-            "data" => $user->items(),
+            "data" => array_map(function($userItem) {
+                return ['user' => $userItem];
+            }, $user->items()),
             "errors" => null,
             "pagination" => [
             "total" => $user->total(),
