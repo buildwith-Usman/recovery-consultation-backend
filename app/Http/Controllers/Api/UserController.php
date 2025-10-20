@@ -255,54 +255,54 @@ class UserController extends Controller
         }
     }
 
-    public function appointments(Request $request)
-    {
-        $limit = $request->input('limit') ?? 10;
-        $purpose = $request->input('purpose');
-        $user = auth()->user();
+    // public function appointments(Request $request)
+    // {
+    //     $limit = $request->input('limit') ?? 10;
+    //     $purpose = $request->input('purpose');
+    //     $user = auth()->user();
 
-        try {
-            $appointments = Appointment::with([
-                'patient' => function ($q) {
-                    $q->with($this->user_relational_array);
-                },
-                'doctor' => function ($q) {
-                    $q->with($this->user_relational_array);
-                }
-            ])
-            ->where(function ($q) use ($user, $purpose) {
+    //     try {
+    //         $appointments = Appointment::with([
+    //             'patient' => function ($q) {
+    //                 $q->with($this->user_relational_array);
+    //             },
+    //             'doctor' => function ($q) {
+    //                 $q->with($this->user_relational_array);
+    //             }
+    //         ])
+    //         ->where(function ($q) use ($user, $purpose) {
 
-                if ($user->type === "doctor") {
-                    $q->where('doc_user_id', $user->id);
-                } else if ($user->type === "patient") {
-                    $q->where('pat_user_id', $user->id);
-                }
+    //             if ($user->type === "doctor") {
+    //                 $q->where('doc_user_id', $user->id);
+    //             } else if ($user->type === "patient") {
+    //                 $q->where('pat_user_id', $user->id);
+    //             }
 
-                if ($purpose) {
-                    $q->where('status', $purpose);
-                }
-            })
-            ->orderBy('id', 'desc')->paginate($limit);
+    //             if ($purpose) {
+    //                 $q->where('status', $purpose);
+    //             }
+    //         })
+    //         ->orderBy('id', 'desc')->paginate($limit);
 
-            return response()->json([
-                "message" => "Appointment list",
-                "data" => $appointments->items(),
-                "pagination" => [
-                    "total" => $appointments->total(),
-                    "current_page" => $appointments->currentPage(),
-                    "per_page" => $appointments->perPage(),
-                    "last_page" => $appointments->lastPage(),
-                    "from" => $appointments->firstItem(),
-                    "to" => $appointments->lastItem()
-                ]
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Registration failed',
-                'errors' => [$e->getMessage()]
-            ], 500);
-        }
-    }
+    //         return response()->json([
+    //             "message" => "Appointment list",
+    //             "data" => $appointments->items(),
+    //             "pagination" => [
+    //                 "total" => $appointments->total(),
+    //                 "current_page" => $appointments->currentPage(),
+    //                 "per_page" => $appointments->perPage(),
+    //                 "last_page" => $appointments->lastPage(),
+    //                 "from" => $appointments->firstItem(),
+    //                 "to" => $appointments->lastItem()
+    //             ]
+    //         ], 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'message' => 'Registration failed',
+    //             'errors' => [$e->getMessage()]
+    //         ], 500);
+    //     }
+    // }
 
     public function reviews(Request $request)
     {
@@ -340,5 +340,62 @@ class UserController extends Controller
                 'errors' => [$e->getMessage()]
             ], 500);
         }
+    }
+
+    public function appointments(Request $request) {
+        $limit = $request->input('limit') ?? 10;
+        $docUserId = $request->input('doc_user_id');
+        $patUserId = $request->input('pat_user_id');
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+        $type = $request->input('type'); // upcoming, ongoing, all
+        $status = $request->input('status');
+
+        $appointments = Appointment::with([
+            'patient' => function ($q) {
+                $q->with('patientInfo', 'doctorInfo', 'file');
+            },
+            'doctor' => function ($q) {
+                $q->with('patientInfo', 'doctorInfo', 'file');
+            }
+        ])
+        ->when($type === 'upcoming', function ($q) {
+            $q->where('start_time_in_secconds', '>=', time());
+        })
+        ->when($type === 'ongoing', function ($q) {
+            $q->where('start_time_in_secconds', '<=', time())
+              ->where('end_time_in_secconds', '>=', time());
+        })
+        ->when($docUserId, function ($q) use ($docUserId) {
+            $q->where('doc_user_id', $docUserId);
+        })
+        ->when($patUserId, function ($q) use ($patUserId) {
+            $q->where('pat_user_id', $patUserId);
+        })
+        ->when($dateFrom, function ($q) use ($dateFrom) {
+            $q->where('date', '>=', $dateFrom);
+        })
+        ->when($dateTo, function ($q) use ($dateTo) {
+            $q->where('date', '<=', $dateTo);
+        })
+        ->when($status, function ($q) use ($status) {
+            $q->where('status', $status);
+        })
+        ->orderBy('start_time_in_secconds', 'asc')
+        ->paginate($limit);
+
+        return response()->json([
+            "message" => "Appointments list.",
+            "data" => $appointments->items(),
+            "errors" => null,
+            "pagination" => [
+                "total" => $appointments->total(),
+                "current_page" => $appointments->currentPage(),
+                "per_page" => $appointments->perPage(),
+                "last_page" => $appointments->lastPage(),
+                "from" => $appointments->firstItem(),
+                "to" => $appointments->lastItem()
+            ]
+        ], 200);
     }
 }

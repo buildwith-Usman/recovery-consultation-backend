@@ -60,15 +60,15 @@ Route::name('api.')->group(function () {
 
         // For Users (Patients and Doctors) endpoints
         Route::get('doctor', [UserController::class, 'doctor_details'])->name('doctor.details');
-        Route::post('appointments-list', [UserController::class, 'appointments'])->name('appointments');
+        // Route::post('appointments-list', [UserController::class, 'appointments'])->name('appointments');
         Route::get('reviews', [UserController::class, 'reviews'])->name('reviews');
+        Route::get('appointments', [UserController::class, 'appointments']);
 
         // Admin endpoints
         Route::middleware(['auth.admin'])->prefix('admin')->group(function () {
             Route::post('update-user', [AdminUserController::class, 'update_user']);
             Route::get('users-list', [AdminUserController::class, 'allUsers']);
             Route::post('approve', [AdminUserController::class, 'approve']);
-            Route::get('appointments', [AdminUserController::class, 'appointments']);
         });
     });
 });
