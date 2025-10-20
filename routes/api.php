@@ -68,6 +68,7 @@ Route::name('api.')->group(function () {
             Route::post('update-user', [AdminUserController::class, 'update_user']);
             Route::get('users-list', [AdminUserController::class, 'allUsers']);
             Route::post('approve', [AdminUserController::class, 'approve']);
+            Route::get('appointments', [AdminUserController::class, 'appointments']);
         });
     });
 });

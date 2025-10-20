@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Appointment;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -13,6 +14,7 @@ class UserController extends Controller
         $limit = $request->input('limit') ?? 10;
         $type = $request->input('type');
         $specialization = $request->input('specialization');
+        $status = $request->input('doctor.status');
 
         $user = User::with('patientInfo', 'doctorInfo')
         ->where(function ($q) use($type) {
@@ -20,11 +22,14 @@ class UserController extends Controller
                 $q->where('type', $type);
             }
         })
-        ->when($type === 'doctor', function ($q) use($specialization) {
-            $q->whereHas('doctorInfo', function ($query) use($specialization) {
+        ->when($type === 'doctor', function ($q) use($specialization, $status) {
+            $q->whereHas('doctorInfo', function ($query) use($specialization, $status) {
                 $query->where('completed', 1);
                 if($specialization) {
                     $query->where('specialization', $specialization);
+                }
+                if($status) {
+                    $query->where('status', $status);
                 }
             });
         })
@@ -157,6 +162,63 @@ class UserController extends Controller
         return response()->json([
             'message' => 'User updated successfully.',
             'data' => $user
+        ], 200);
+    }
+
+    public function appointments(Request $request) {
+        $limit = $request->input('limit') ?? 10;
+        $docUserId = $request->input('doc_user_id');
+        $patUserId = $request->input('pat_user_id');
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+        $type = $request->input('type'); // upcoming, ongoing, all
+        $status = $request->input('status');
+
+        $appointments = Appointment::with([
+            'patient' => function ($q) {
+                $q->with('patientInfo', 'doctorInfo', 'file');
+            },
+            'doctor' => function ($q) {
+                $q->with('patientInfo', 'doctorInfo', 'file');
+            }
+        ])
+        ->when($type === 'upcoming', function ($q) {
+            $q->where('start_time_in_secconds', '>=', time());
+        })
+        ->when($type === 'ongoing', function ($q) {
+            $q->where('start_time_in_secconds', '<=', time())
+              ->where('end_time_in_secconds', '>=', time());
+        })
+        ->when($docUserId, function ($q) use ($docUserId) {
+            $q->where('doc_user_id', $docUserId);
+        })
+        ->when($patUserId, function ($q) use ($patUserId) {
+            $q->where('pat_user_id', $patUserId);
+        })
+        ->when($dateFrom, function ($q) use ($dateFrom) {
+            $q->where('date', '>=', $dateFrom);
+        })
+        ->when($dateTo, function ($q) use ($dateTo) {
+            $q->where('date', '<=', $dateTo);
+        })
+        ->when($status, function ($q) use ($status) {
+            $q->where('status', $status);
+        })
+        ->orderBy('start_time_in_secconds', 'asc')
+        ->paginate($limit);
+
+        return response()->json([
+            "message" => "Appointments list.",
+            "data" => $appointments->items(),
+            "errors" => null,
+            "pagination" => [
+                "total" => $appointments->total(),
+                "current_page" => $appointments->currentPage(),
+                "per_page" => $appointments->perPage(),
+                "last_page" => $appointments->lastPage(),
+                "from" => $appointments->firstItem(),
+                "to" => $appointments->lastItem()
+            ]
         ], 200);
     }
 }
