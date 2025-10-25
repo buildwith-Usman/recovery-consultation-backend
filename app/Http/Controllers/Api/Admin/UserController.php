@@ -157,7 +157,7 @@ class UserController extends Controller
         }
 
         // Reload user with relationships
-        $user->load('patientInfo', 'doctorInfo', 'available_times', 'file');
+        $user->load('patientInfo', 'doctorInfo', 'questionnaires', 'userLanguages', 'file', 'available_times');
 
         return response()->json([
             'message' => 'User updated successfully.',

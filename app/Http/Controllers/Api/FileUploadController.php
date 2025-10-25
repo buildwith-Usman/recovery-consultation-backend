@@ -25,7 +25,7 @@ class FileUploadController extends Controller
         $data['file_name'] = $file->getClientOriginalName();
         $data['extension'] = $file->getClientOriginalExtension();
         $data['mime_type'] = $file->getMimeType();
-        $data['size'] = $file->getSize();
+        $data['size'] = (string)$file->getSize();
         $data['path'] = $path;
         $data['url'] = Storage::url($path);
 
