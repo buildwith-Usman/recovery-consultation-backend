@@ -20,7 +20,8 @@ class UserController extends Controller
         'questionnaires',
         'userLanguages',
         'file',
-        'available_times'
+        'available_times',
+        'timeSlots'
     ];
     public function index(Request $request)
     {
@@ -218,11 +219,11 @@ class UserController extends Controller
         }
     }
 
-    public function doctor_details(Request $request)
+    public function user_details(Request $request)
     {
         $id = $request->input('id');
         try {
-            $doctor = User::with(array_merge(
+            $user = User::with(array_merge(
                 $this->user_relational_array, 
                 [
                     'reviews' => function ($query) {
@@ -233,13 +234,12 @@ class UserController extends Controller
                 ->withCount('doc_appointments')
                 ->where([
                     'id' => $id,
-                    'type' => 'doctor'
                 ])
                 ->first();
-            $doctor->total_rating = $doctor->reviews->avg('rating') ?? 0;
+            $user->total_rating = $user->reviews->avg('rating') ?? 0;
             return response()->json([
                 "message" => "Doctor retrieved successfully",
-                "data" => $doctor
+                "data" => $user
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -254,55 +254,6 @@ class UserController extends Controller
             ], 500);
         }
     }
-
-    // public function appointments(Request $request)
-    // {
-    //     $limit = $request->input('limit') ?? 10;
-    //     $purpose = $request->input('purpose');
-    //     $user = auth()->user();
-
-    //     try {
-    //         $appointments = Appointment::with([
-    //             'patient' => function ($q) {
-    //                 $q->with($this->user_relational_array);
-    //             },
-    //             'doctor' => function ($q) {
-    //                 $q->with($this->user_relational_array);
-    //             }
-    //         ])
-    //         ->where(function ($q) use ($user, $purpose) {
-
-    //             if ($user->type === "doctor") {
-    //                 $q->where('doc_user_id', $user->id);
-    //             } else if ($user->type === "patient") {
-    //                 $q->where('pat_user_id', $user->id);
-    //             }
-
-    //             if ($purpose) {
-    //                 $q->where('status', $purpose);
-    //             }
-    //         })
-    //         ->orderBy('id', 'desc')->paginate($limit);
-
-    //         return response()->json([
-    //             "message" => "Appointment list",
-    //             "data" => $appointments->items(),
-    //             "pagination" => [
-    //                 "total" => $appointments->total(),
-    //                 "current_page" => $appointments->currentPage(),
-    //                 "per_page" => $appointments->perPage(),
-    //                 "last_page" => $appointments->lastPage(),
-    //                 "from" => $appointments->firstItem(),
-    //                 "to" => $appointments->lastItem()
-    //             ]
-    //         ], 200);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'message' => 'Registration failed',
-    //             'errors' => [$e->getMessage()]
-    //         ], 500);
-    //     }
-    // }
 
     public function reviews(Request $request)
     {

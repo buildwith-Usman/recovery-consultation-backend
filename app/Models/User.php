@@ -86,4 +86,8 @@ class User extends Authenticatable
     public function available_times() {
         return $this->hasMany(UserAvailableTime::class, 'user_id');
     }
+
+    public function timeSlots() {
+        return $this->hasMany(UserTimeSlot::class, 'user_id');
+    }
 }

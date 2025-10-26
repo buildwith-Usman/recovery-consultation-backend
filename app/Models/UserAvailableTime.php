@@ -19,4 +19,12 @@ class UserAvailableTime extends Model
         'start_time',
         'end_time'
     ];
+
+    public function user() {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function timeSlots() {
+        return $this->hasMany(UserTimeSlot::class, 'available_time_id');
+    }
 }

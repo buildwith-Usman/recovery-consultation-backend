@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\User;
+use App\Models\UserTimeSlot;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class UserController extends Controller
 {
@@ -142,6 +144,9 @@ class UserController extends Controller
                         $user->available_times()->create($timeData);
                     }
                 }
+
+                // Generate time slots for all available times
+                $this->generateTimeSlots($user);
             }
         } elseif ($user->type === 'patient') {
             // Update or create patient info
@@ -157,7 +162,7 @@ class UserController extends Controller
         }
 
         // Reload user with relationships
-        $user->load('patientInfo', 'doctorInfo', 'questionnaires', 'userLanguages', 'file', 'available_times');
+        $user->load('patientInfo', 'doctorInfo', 'questionnaires', 'userLanguages', 'file', 'available_times', 'timeSlots');
 
         return response()->json([
             'message' => 'User updated successfully.',
@@ -220,5 +225,53 @@ class UserController extends Controller
                 "to" => $appointments->lastItem()
             ]
         ], 200);
+    }
+
+    /**
+     * Generate time slots based on available times
+     */
+    private function generateTimeSlots(User $user)
+    {
+        // Delete all existing time slots for this user
+        UserTimeSlot::where('user_id', $user->id)->delete();
+
+        // Get all available times for the user
+        $availableTimes = $user->available_times()->where('status', 'available')->get();
+
+        foreach ($availableTimes as $availableTime) {
+            // Skip if required fields are missing
+            if (!$availableTime->start_time || !$availableTime->end_time || !$availableTime->session_duration) {
+                continue;
+            }
+
+            $sessionDuration = (int) $availableTime->session_duration; // in minutes
+            $startTime = Carbon::parse($availableTime->start_time);
+            $endTime = Carbon::parse($availableTime->end_time);
+
+            // Generate slots
+            $currentSlotStart = $startTime->copy();
+
+            while ($currentSlotStart->lt($endTime)) {
+                $currentSlotEnd = $currentSlotStart->copy()->addMinutes($sessionDuration);
+
+                // Don't create slot if it exceeds end time
+                if ($currentSlotEnd->gt($endTime)) {
+                    break;
+                }
+
+                // Create time slot
+                UserTimeSlot::create([
+                    'user_id' => $user->id,
+                    'available_time_id' => $availableTime->id,
+                    'weekday' => $availableTime->weekday,
+                    'slot_start_time' => $currentSlotStart->format('H:i:s'),
+                    'slot_end_time' => $currentSlotEnd->format('H:i:s'),
+                    'is_booked' => false
+                ]);
+
+                // Move to next slot
+                $currentSlotStart = $currentSlotEnd->copy();
+            }
+        }
     }
 }

@@ -59,7 +59,7 @@ Route::name('api.')->group(function () {
         Route::get('patient-history', [DoctorController::class, 'patient_history'])->name('doctor.patient.history');
 
         // For Users (Patients and Doctors) endpoints
-        Route::get('doctor', [UserController::class, 'doctor_details'])->name('doctor.details');
+        Route::get('user-detail', [UserController::class, 'user_details'])->name('user.details');
         // Route::post('appointments-list', [UserController::class, 'appointments'])->name('appointments');
         Route::get('reviews', [UserController::class, 'reviews'])->name('reviews');
         Route::get('appointments', [UserController::class, 'appointments']);
