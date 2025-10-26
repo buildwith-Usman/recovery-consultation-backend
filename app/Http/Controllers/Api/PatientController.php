@@ -7,6 +7,7 @@ use App\Models\Appointment;
 use App\Models\User;
 use App\Models\UserAvailableTime;
 use App\Models\UserReview;
+use App\Models\UserTimeSlot;
 use Illuminate\Http\Request;
 
 class PatientController extends Controller
@@ -166,7 +167,7 @@ class PatientController extends Controller
       $request->validate([
         'doc_user_id' => 'required|exists:users,id',
         'date' => 'required|date',
-        'user_available_time_id' => 'required|exists:user_available_times,id'
+        'time_slot_id' => 'required|exists:user_time_slots,id'
       ]);
 
       // Get authenticated patient
@@ -181,39 +182,39 @@ class PatientController extends Controller
         ], 422);
       }
 
-      // Get the doctor's available time slot
-      $availableTime = UserAvailableTime::where('id', $request->user_available_time_id)
+      // Get the time slot
+      $timeSlot = UserTimeSlot::where('id', $request->time_slot_id)
         ->where('user_id', $request->doc_user_id)
-        ->where('status', 'available')
         ->first();
 
-      if (!$availableTime) {
+      if (!$timeSlot) {
         return response()->json([
-          'message' => 'Time slot not available',
-          'errors' => ['The selected time slot is not available for this doctor']
+          'message' => 'Time slot not found',
+          'errors' => ['The selected time slot does not belong to this doctor']
         ], 422);
       }
 
-      // Check if the requested date matches the weekday of the available time
-      $requestedWeekday = strtolower(date('l', strtotime($request->date)));
-      if ($availableTime->weekday !== $requestedWeekday) {
+      // Check if time slot is already booked
+      if ($timeSlot->is_booked) {
+        return response()->json([
+          'message' => 'Time slot already booked',
+          'errors' => ['This time slot is already booked']
+        ], 422);
+      }
+
+      // Check if the requested date matches the weekday of the time slot
+      $requestedWeekday = date('D', strtotime($request->date));
+      if ($timeSlot->weekday !== $requestedWeekday) {
         return response()->json([
           'message' => 'Invalid date',
-          'errors' => ['The selected date does not match the available time slot weekday']
+          'errors' => ['The selected date does not match the time slot weekday']
         ], 422);
       }
 
-      // Check for conflicting appointments
+      // Check for conflicting appointments on the same date and time slot
       $conflictingAppointment = Appointment::where('doc_user_id', $request->doc_user_id)
         ->where('date', $request->date)
-        ->where(function ($query) use ($availableTime) {
-          $query->whereBetween('start_time', [$availableTime->start_time, $availableTime->end_time])
-            ->orWhereBetween('end_time', [$availableTime->start_time, $availableTime->end_time])
-            ->orWhere(function ($q) use ($availableTime) {
-              $q->where('start_time', '<=', $availableTime->start_time)
-                ->where('end_time', '>=', $availableTime->end_time);
-            });
-        })
+        ->where('time_slot_id', $request->time_slot_id)
         ->exists();
 
       if ($conflictingAppointment) {
@@ -231,15 +232,20 @@ class PatientController extends Controller
         'pat_user_id' => $patientId,
         'doc_user_id' => $request->doc_user_id,
         'date' => $request->date,
-        'start_time' => $availableTime->start_time,
-        'end_time' => $availableTime->end_time,
-        'start_time_in_secconds' => strtotime($request->date . ' ' . $availableTime->start_time),
-        'end_time_in_secconds' => strtotime($request->date . ' ' . $availableTime->end_time),
-        'price' => $price
+        'start_time' => $timeSlot->slot_start_time,
+        'end_time' => $timeSlot->slot_end_time,
+        'start_time_in_secconds' => strtotime($request->date . ' ' . $timeSlot->slot_start_time),
+        'end_time_in_secconds' => strtotime($request->date . ' ' . $timeSlot->slot_end_time),
+        'price' => $price,
+        'time_slot_id' => $request->time_slot_id
       ]);
 
+      // Mark time slot as booked
+      $timeSlot->is_booked = true;
+      $timeSlot->save();
+
       // Load relationships for response
-      $appointment->load(['patient', 'doctor']);
+      $appointment->load(['patient', 'doctor', 'timeSlot']);
 
       return response()->json([
         'message' => 'Appointment booked successfully',
