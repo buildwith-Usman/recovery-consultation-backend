@@ -136,13 +136,11 @@ class UserController extends Controller
                 $availableTimes = $request->input('available_times');
 
                 foreach ($availableTimes as $timeData) {
-                    if (isset($timeData['weekday'])) {
-                        // Update existing time
-                        $user->available_times()->where('weekday', $timeData['weekday'])->update($timeData);
-                    } else {
-                        // Create new time
-                        $user->available_times()->create($timeData);
-                    }
+                    // Update or create based on weekday
+                    $user->available_times()->updateOrCreate(
+                        ['user_id' => $user->id, 'weekday' => $timeData['weekday']],
+                        $timeData
+                    );
                 }
 
                 // Generate time slots for all available times
