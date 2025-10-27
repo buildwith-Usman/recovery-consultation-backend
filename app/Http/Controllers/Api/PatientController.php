@@ -167,7 +167,8 @@ class PatientController extends Controller
       $request->validate([
         'doc_user_id' => 'required|exists:users,id',
         'date' => 'required|date',
-        'time_slot_id' => 'required|exists:user_time_slots,id'
+        'time_slot_id' => 'required|exists:user_time_slots,id',
+        'agora_video_url' => 'nullable|string|max:500'
       ]);
 
       // Get authenticated patient
@@ -237,7 +238,8 @@ class PatientController extends Controller
         'start_time_in_secconds' => strtotime($request->date . ' ' . $timeSlot->slot_start_time),
         'end_time_in_secconds' => strtotime($request->date . ' ' . $timeSlot->slot_end_time),
         'price' => $price,
-        'time_slot_id' => $request->time_slot_id
+        'time_slot_id' => $request->time_slot_id,
+        'agora_video_url' => $request->input('agora_video_url')
       ]);
 
       // Mark time slot as booked

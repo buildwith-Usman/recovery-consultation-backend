@@ -349,4 +349,47 @@ class UserController extends Controller
             ]
         ], 200);
     }
+
+    public function appointment_detail(Request $request) {
+        $appointmentId = $request->input('appointment_id');
+
+        if (!$appointmentId) {
+            return response()->json([
+                'message' => 'Appointment ID is required',
+                'errors' => ['appointment_id is required']
+            ], 422);
+        }
+
+        $appointment = Appointment::with([
+            'patient' => function ($q) {
+                $q->with('patientInfo', 'doctorInfo', 'file');
+            },
+            'doctor' => function ($q) {
+                $q->with('patientInfo', 'doctorInfo', 'file');
+            },
+            'timeSlot'
+        ])->find($appointmentId);
+
+        if (!$appointment) {
+            return response()->json([
+                'message' => 'Appointment not found',
+                'errors' => ['Appointment does not exist']
+            ], 404);
+        }
+
+        // Check if the authenticated user has access to this appointment
+        $user = auth()->user();
+        if ($appointment->pat_user_id !== $user->id && $appointment->doc_user_id !== $user->id) {
+            return response()->json([
+                'message' => 'Unauthorized',
+                'errors' => ['You do not have access to this appointment']
+            ], 403);
+        }
+
+        return response()->json([
+            'message' => 'Appointment details retrieved successfully',
+            'data' => $appointment,
+            'errors' => null
+        ], 200);
+    }
 }

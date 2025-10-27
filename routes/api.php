@@ -63,6 +63,7 @@ Route::name('api.')->group(function () {
         // Route::post('appointments-list', [UserController::class, 'appointments'])->name('appointments');
         Route::get('reviews', [UserController::class, 'reviews'])->name('reviews');
         Route::get('appointments', [UserController::class, 'appointments']);
+        Route::get('appointment-detail', [UserController::class, 'appointment_detail'])->name('appointment.detail');
 
         // Admin endpoints
         Route::middleware(['auth.admin'])->prefix('admin')->group(function () {

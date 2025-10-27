@@ -20,7 +20,9 @@ class Appointment extends Model
         'start_time_in_secconds',
         'end_time_in_secconds',
         'price',
-        'time_slot_id'
+        'time_slot_id',
+        'status',
+        'agora_video_url'
     ];
 
     public function patient() {
