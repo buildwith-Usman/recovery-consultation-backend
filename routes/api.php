@@ -5,7 +5,11 @@ use App\Http\Controllers\Api\FileUploadController;
 use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\PatientController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Api\Admin\AdBannerController;
+use App\Http\Controllers\Api\Admin\CategoryController;
+use App\Http\Controllers\Api\Admin\ProductController as AdminProductController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\RegisterController;
@@ -41,6 +45,17 @@ Route::name('api.')->group(function () {
     Route::post('/upload-file', [FileUploadController::class, 'uplaod'])->name('file.uplaod');
     Route::get('/file', [FileUploadController::class, 'file'])->name('file');
 
+    // Public endpoint for active ad banners
+    Route::get('/ad-banners/active', [AdBannerController::class, 'activeList'])->name('ad-banners.active');
+
+    // Public endpoints for products
+    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
+    Route::get('/products/category/{categoryId}', [ProductController::class, 'byCategory'])->name('products.by-category');
+
+    // Public endpoint for active categories (for dropdown)
+    Route::get('/categories/active', [CategoryController::class, 'activeList'])->name('categories.active');
+
     // Protected routes
     Route::middleware(['auth:api'])->group(function () {
         Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
@@ -65,11 +80,56 @@ Route::name('api.')->group(function () {
         Route::get('appointments', [UserController::class, 'appointments']);
         Route::get('appointment-detail', [UserController::class, 'appointment_detail'])->name('appointment.detail');
 
+        // Patient Prescriptions
+        Route::get('prescriptions', [UserController::class, 'prescriptions'])->name('prescriptions.list');
+        Route::get('prescription-detail', [UserController::class, 'prescription_detail'])->name('prescription.detail');
+
+        // Doctor Prescriptions
+        Route::prefix('doctor')->group(function () {
+            Route::get('prescriptions', [\App\Http\Controllers\Api\Doctor\PrescriptionController::class, 'index']);
+            Route::post('prescriptions', [\App\Http\Controllers\Api\Doctor\PrescriptionController::class, 'store']);
+            Route::get('prescriptions/{id}', [\App\Http\Controllers\Api\Doctor\PrescriptionController::class, 'show']);
+            Route::put('prescriptions/{id}', [\App\Http\Controllers\Api\Doctor\PrescriptionController::class, 'update']);
+            Route::delete('prescriptions/{id}', [\App\Http\Controllers\Api\Doctor\PrescriptionController::class, 'destroy']);
+        });
+
+        // Order Management
+        Route::get('orders', [\App\Http\Controllers\Api\OrderController::class, 'index'])->name('orders.list');
+        Route::post('orders', [\App\Http\Controllers\Api\OrderController::class, 'store'])->name('orders.create');
+        Route::get('orders/{orderNumber}', [\App\Http\Controllers\Api\OrderController::class, 'show'])->name('orders.show');
+        Route::get('orders/{orderNumber}/track', [\App\Http\Controllers\Api\OrderController::class, 'track'])->name('orders.track');
+
         // Admin endpoints
         Route::middleware(['auth.admin'])->prefix('admin')->group(function () {
             Route::post('update-user', [AdminUserController::class, 'update_user']);
             Route::get('users-list', [AdminUserController::class, 'allUsers']);
             Route::post('approve', [AdminUserController::class, 'approve']);
+
+            // Ad Banner CRUD endpoints
+            Route::get('ad-banners', [AdBannerController::class, 'index']);
+            Route::post('ad-banners', [AdBannerController::class, 'store']);
+            Route::get('ad-banners/{id}', [AdBannerController::class, 'show']);
+            Route::put('ad-banners/{id}', [AdBannerController::class, 'update']);
+            Route::delete('ad-banners/{id}', [AdBannerController::class, 'destroy']);
+
+            // Category CRUD endpoints
+            Route::get('categories', [CategoryController::class, 'index']);
+            Route::post('categories', [CategoryController::class, 'store']);
+            Route::get('categories/{id}', [CategoryController::class, 'show']);
+            Route::put('categories/{id}', [CategoryController::class, 'update']);
+            Route::delete('categories/{id}', [CategoryController::class, 'destroy']);
+
+            // Product CRUD endpoints
+            Route::get('products', [AdminProductController::class, 'index']);
+            Route::post('products', [AdminProductController::class, 'store']);
+            Route::get('products/{id}', [AdminProductController::class, 'show']);
+            Route::put('products/{id}', [AdminProductController::class, 'update']);
+            Route::delete('products/{id}', [AdminProductController::class, 'destroy']);
+
+            // Order Management endpoints
+            Route::get('orders', [\App\Http\Controllers\Api\Admin\OrderController::class, 'index']);
+            Route::get('orders/{orderNumber}', [\App\Http\Controllers\Api\Admin\OrderController::class, 'show']);
+            Route::put('orders/{orderNumber}/status', [\App\Http\Controllers\Api\Admin\OrderController::class, 'updateStatus']);
         });
     });
 });

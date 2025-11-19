@@ -1,0 +1,876 @@
+{
+	"info": {
+		"_postman_id": "9ef9db09-bc49-4ac3-a04e-2d2888f44d72",
+		"name": "Recovery App API - Complete",
+		"description": "Complete API collection for Recovery App with Authentication, Appointments, Prescriptions, Products, Categories, and Orders",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "47632510"
+	},
+	"item": [
+		{
+			"name": "1. Authentication",
+			"item": [
+				{
+					"name": "Register - Patient",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Patient\",\n  \"email\": \"patient@example.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"type\": \"patient\",\n  \"phone\": \"03001234567\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/register", "host": ["{{base_url}}"], "path": ["register"]}
+					}
+				},
+				{
+					"name": "Register - Doctor",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Dr. Test\",\n  \"email\": \"doctor@example.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"type\": \"doctor\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/register", "host": ["{{base_url}}"], "path": ["register"]}
+					}
+				},
+				{
+					"name": "Verify Email",
+					"event": [{"listen": "test", "script": {"exec": ["if (pm.response.code === 200) {", "    const response = pm.response.json();", "    pm.collectionVariables.set('access_token', response.access_token);", "}"], "type": "text/javascript"}}],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"signup\",\n  \"email\": \"patient@example.com\",\n  \"verification_code\": \"12345\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/email/verify", "host": ["{{base_url}}"], "path": ["email", "verify"]}
+					}
+				},
+				{
+					"name": "Resend Verification Code",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"signup\",\n  \"email\": \"patient@example.com\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/email/resend", "host": ["{{base_url}}"], "path": ["email", "resend"]}
+					}
+				},
+				{
+					"name": "Login",
+					"event": [{"listen": "test", "script": {"exec": ["if (pm.response.code === 200) {", "    const response = pm.response.json();", "    pm.collectionVariables.set('access_token', response.access_token);", "}"], "type": "text/javascript"}}],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"patient@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"]}
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "POST",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {"raw": "{{base_url}}/logout", "host": ["{{base_url}}"], "path": ["logout"]}
+					}
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"patient@example.com\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/forgot-password", "host": ["{{base_url}}"], "path": ["forgot-password"]}
+					}
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"patient@example.com\",\n  \"reset_code\": \"12345\",\n  \"password\": \"newpassword123\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/reset-password", "host": ["{{base_url}}"], "path": ["reset-password"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. User Profile",
+			"item": [
+				{
+					"name": "Get Logged User",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {"raw": "{{base_url}}/user", "host": ["{{base_url}}"], "path": ["user"]}
+					}
+				},
+				{
+					"name": "Update Profile - Patient",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Name\",\n  \"phone\": \"03001234567\",\n  \"file_id\": 1,\n  \"looking_for\": \"therapist\",\n  \"age\": 25,\n  \"dob\": \"1999-01-01\",\n  \"gender\": \"male\",\n  \"blood_group\": \"O+\",\n  \"completed\": 1\n}"
+						},
+						"url": {"raw": "{{base_url}}/update-profile", "host": ["{{base_url}}"], "path": ["update-profile"]}
+					}
+				},
+				{
+					"name": "Update Profile - Doctor",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Dr. Updated\",\n  \"phone\": \"03001234567\",\n  \"file_id\": 1,\n  \"specialization\": \"therapist\",\n  \"experience\": 5,\n  \"degree\": \"MBBS\",\n  \"license_no\": \"DOC123\",\n  \"age\": 35,\n  \"dob\": \"1989-01-01\",\n  \"gender\": \"male\",\n  \"languages\": [\"English\", \"Urdu\"],\n  \"completed\": 1\n}"
+						},
+						"url": {"raw": "{{base_url}}/update-profile", "host": ["{{base_url}}"], "path": ["update-profile"]}
+					}
+				},
+				{
+					"name": "Add Questionnaires",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"questionnaires\": [\n    {\n      \"question\": \"What gender do you prefer your therapist to be?\",\n      \"options\": [\"Male\", \"Female\"],\n      \"answer\": \"Male\",\n      \"key\": \"gender_prefer\"\n    }\n  ]\n}"
+						},
+						"url": {"raw": "{{base_url}}/add-questionnaires", "host": ["{{base_url}}"], "path": ["add-questionnaires"]}
+					}
+				},
+				{
+					"name": "Get User Detail",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/user-detail?id=1",
+							"host": ["{{base_url}}"],
+							"path": ["user-detail"],
+							"query": [{"key": "id", "value": "1", "description": "Required: User ID"}]
+						}
+					}
+				},
+				{
+					"name": "Get Reviews",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/reviews?limit=10&user_id=1",
+							"host": ["{{base_url}}"],
+							"path": ["reviews"],
+							"query": [
+								{"key": "limit", "value": "10", "description": "Optional: Items per page"},
+								{"key": "user_id", "value": "1", "description": "Optional: Filter by user ID"}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Doctors",
+			"item": [
+				{
+					"name": "Get Doctors List",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/doctors-list?specialization=therapist&limit=10&page=1",
+							"host": ["{{base_url}}"],
+							"path": ["doctors-list"],
+							"query": [
+								{"key": "specialization", "value": "therapist", "description": "Optional: therapist, psychiatrist"},
+								{"key": "language", "value": "", "description": "Optional: Filter by language", "disabled": true},
+								{"key": "limit", "value": "10", "description": "Optional: Items per page"},
+								{"key": "page", "value": "1", "description": "Optional: Page number"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Match Doctors List",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/match-doctors-list?limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["match-doctors-list"],
+							"query": [{"key": "limit", "value": "10", "description": "Optional: Items per page"}]
+						}
+					}
+				},
+				{
+					"name": "Get Doctor Patients",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/patients?limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["patients"],
+							"query": [{"key": "limit", "value": "10", "description": "Optional: Items per page"}]
+						}
+					}
+				},
+				{
+					"name": "Get Patient History",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/patient-history?patient_id=1&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["patient-history"],
+							"query": [
+								{"key": "patient_id", "value": "1", "description": "Required: Patient user ID"},
+								{"key": "limit", "value": "10", "description": "Optional: Items per page"}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Appointments",
+			"item": [
+				{
+					"name": "Book Appointment",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"doc_user_id\": 1,\n  \"date\": \"2025-12-01\",\n  \"time_slot_id\": 1\n}"
+						},
+						"url": {"raw": "{{base_url}}/appointment-booking", "host": ["{{base_url}}"], "path": ["appointment-booking"]}
+					}
+				},
+				{
+					"name": "Get Appointments List",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/appointments?limit=10&type=all&status=completed",
+							"host": ["{{base_url}}"],
+							"path": ["appointments"],
+							"query": [
+								{"key": "limit", "value": "10", "description": "Optional: Items per page"},
+								{"key": "page", "value": "1", "description": "Optional: Page number", "disabled": true},
+								{"key": "type", "value": "all", "description": "Optional: upcoming, ongoing, all"},
+								{"key": "doc_user_id", "value": "", "description": "Optional: Filter by doctor ID", "disabled": true},
+								{"key": "pat_user_id", "value": "", "description": "Optional: Filter by patient ID", "disabled": true},
+								{"key": "date_from", "value": "", "description": "Optional: From date (YYYY-MM-DD)", "disabled": true},
+								{"key": "date_to", "value": "", "description": "Optional: To date (YYYY-MM-DD)", "disabled": true},
+								{"key": "status", "value": "completed", "description": "Optional: draft, pending, completed"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Appointment Detail",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/appointment-detail?appointment_id=1",
+							"host": ["{{base_url}}"],
+							"path": ["appointment-detail"],
+							"query": [{"key": "appointment_id", "value": "1", "description": "Required: Appointment ID"}]
+						}
+					}
+				},
+				{
+					"name": "Add Review",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"receiver_id\": 1,\n  \"rating\": 5,\n  \"appointment_id\": 1,\n  \"review\": \"Great doctor!\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/add-reviews", "host": ["{{base_url}}"], "path": ["add-reviews"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "5. Prescriptions",
+			"item": [
+				{
+					"name": "Doctor - Create Prescription",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"appointment_id\": 1,\n  \"prescription_date\": \"2025-11-19\",\n  \"prescription_image_id\": 1,\n  \"notes\": \"Take after meals\",\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"dosage_instructions\": \"1 tab × 3/day | 5 days\",\n      \"quantity\": 15,\n      \"duration_days\": 5\n    }\n  ]\n}"
+						},
+						"url": {"raw": "{{base_url}}/doctor/prescriptions", "host": ["{{base_url}}"], "path": ["doctor", "prescriptions"]}
+					}
+				},
+				{
+					"name": "Doctor - Get Prescriptions List",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/doctor/prescriptions?limit=10&status=issued&patient_id=1",
+							"host": ["{{base_url}}"],
+							"path": ["doctor", "prescriptions"],
+							"query": [
+								{"key": "limit", "value": "10", "description": "Optional: Items per page"},
+								{"key": "status", "value": "issued", "description": "Optional: draft, issued, dispensed"},
+								{"key": "patient_id", "value": "1", "description": "Optional: Filter by patient ID"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Doctor - Get Prescription Detail",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {"raw": "{{base_url}}/doctor/prescriptions/1", "host": ["{{base_url}}"], "path": ["doctor", "prescriptions", "1"]}
+					}
+				},
+				{
+					"name": "Doctor - Update Prescription",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"prescription_image_id\": 2,\n  \"notes\": \"Updated notes\",\n  \"items\": [\n    {\n      \"product_id\": 2,\n      \"dosage_instructions\": \"1 tab × 2/day | 7 days\",\n      \"quantity\": 14,\n      \"duration_days\": 7\n    }\n  ]\n}"
+						},
+						"url": {"raw": "{{base_url}}/doctor/prescriptions/1", "host": ["{{base_url}}"], "path": ["doctor", "prescriptions", "1"]}
+					}
+				},
+				{
+					"name": "Doctor - Delete Prescription",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "DELETE",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {"raw": "{{base_url}}/doctor/prescriptions/1", "host": ["{{base_url}}"], "path": ["doctor", "prescriptions", "1"]}
+					}
+				},
+				{
+					"name": "Patient - Get Prescriptions List",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/prescriptions?limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["prescriptions"],
+							"query": [{"key": "limit", "value": "10", "description": "Optional: Items per page"}]
+						}
+					}
+				},
+				{
+					"name": "Patient - Get Prescription Detail",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/prescription-detail?prescription_id=1",
+							"host": ["{{base_url}}"],
+							"path": ["prescription-detail"],
+							"query": [{"key": "prescription_id", "value": "1", "description": "Required: Prescription ID"}]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "6. Products & Categories",
+			"item": [
+				{
+					"name": "Get Products List (Public)",
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/products?limit=10&category_id=1&search=medicine",
+							"host": ["{{base_url}}"],
+							"path": ["products"],
+							"query": [
+								{"key": "limit", "value": "10", "description": "Optional: Items per page"},
+								{"key": "category_id", "value": "1", "description": "Optional: Filter by category"},
+								{"key": "search", "value": "medicine", "description": "Optional: Search by name"},
+								{"key": "sort_by", "value": "price", "description": "Optional: Sort field", "disabled": true},
+								{"key": "sort_order", "value": "asc", "description": "Optional: asc, desc", "disabled": true}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Product Detail (Public)",
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {"raw": "{{base_url}}/products/1", "host": ["{{base_url}}"], "path": ["products", "1"]}
+					}
+				},
+				{
+					"name": "Get Products by Category (Public)",
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {"raw": "{{base_url}}/products/category/1", "host": ["{{base_url}}"], "path": ["products", "category", "1"]}
+					}
+				},
+				{
+					"name": "Get Active Categories (Public)",
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {"raw": "{{base_url}}/categories/active", "host": ["{{base_url}}"], "path": ["categories", "active"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "7. Orders",
+			"item": [
+				{
+					"name": "Create Order",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"quantity\": 2,\n      \"dosage_info\": \"1 tab × 3/day | 5 days\"\n    },\n    {\n      \"product_id\": 2,\n      \"quantity\": 1\n    }\n  ],\n  \"customer_name\": \"John Doe\",\n  \"customer_phone\": \"03001234567\",\n  \"delivery_address\": \"House 123, Street ABC, Lahore\",\n  \"city\": \"Lahore\",\n  \"country\": \"Pakistan\",\n  \"postal_code\": \"54000\",\n  \"payment_method\": \"jazzcash\",\n  \"prescription_id\": 1,\n  \"delivery_fee\": 100,\n  \"tax_amount\": 0,\n  \"other_fees\": 0\n}"
+						},
+						"url": {"raw": "{{base_url}}/orders", "host": ["{{base_url}}"], "path": ["orders"]}
+					}
+				},
+				{
+					"name": "Get Orders List",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/orders?limit=10&status=all",
+							"host": ["{{base_url}}"],
+							"path": ["orders"],
+							"query": [
+								{"key": "limit", "value": "10", "description": "Optional: Items per page"},
+								{"key": "status", "value": "all", "description": "Optional: all, in_progress, delivered"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Order Detail",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {"raw": "{{base_url}}/orders/MED-001248", "host": ["{{base_url}}"], "path": ["orders", "MED-001248"]}
+					}
+				},
+				{
+					"name": "Track Order",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {"raw": "{{base_url}}/orders/MED-001248/track", "host": ["{{base_url}}"], "path": ["orders", "MED-001248", "track"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "8. Admin",
+			"item": [
+				{
+					"name": "Users",
+					"item": [
+						{
+							"name": "Get Users List",
+							"request": {
+								"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+								"method": "GET",
+								"header": [{"key": "Accept", "value": "application/json"}],
+								"url": {
+									"raw": "{{base_url}}/admin/users-list?limit=10&type=doctor&specialization=therapist",
+									"host": ["{{base_url}}"],
+									"path": ["admin", "users-list"],
+									"query": [
+										{"key": "limit", "value": "10", "description": "Optional: Items per page"},
+										{"key": "page", "value": "1", "description": "Optional: Page number", "disabled": true},
+										{"key": "type", "value": "doctor", "description": "Optional: patient, doctor"},
+										{"key": "specialization", "value": "therapist", "description": "Optional: therapist, psychiatrist"},
+										{"key": "doctor.status", "value": "approved", "description": "Optional: pending, approved, rejected", "disabled": true}
+									]
+								}
+							}
+						},
+						{
+							"name": "Update User",
+							"request": {
+								"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+								"method": "POST",
+								"header": [{"key": "Content-Type", "value": "application/json"}],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"user_id\": 1,\n  \"name\": \"Updated Name\",\n  \"completed\": 1,\n  \"status\": \"approved\",\n  \"commision_type\": \"percentage\",\n  \"commision_value\": 10\n}"
+								},
+								"url": {"raw": "{{base_url}}/admin/update-user", "host": ["{{base_url}}"], "path": ["admin", "update-user"]}
+							}
+						},
+						{
+							"name": "Approve Doctor",
+							"request": {
+								"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+								"method": "POST",
+								"header": [{"key": "Content-Type", "value": "application/json"}],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"doctor_id\": 1\n}"
+								},
+								"url": {"raw": "{{base_url}}/admin/approve", "host": ["{{base_url}}"], "path": ["admin", "approve"]}
+							}
+						}
+					]
+				},
+				{
+					"name": "Categories",
+					"item": [
+						{
+							"name": "Get Categories List",
+							"request": {
+								"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+								"method": "GET",
+								"header": [{"key": "Accept", "value": "application/json"}],
+								"url": {
+									"raw": "{{base_url}}/admin/categories?limit=10&status=active",
+									"host": ["{{base_url}}"],
+									"path": ["admin", "categories"],
+									"query": [
+										{"key": "limit", "value": "10", "description": "Optional: Items per page"},
+										{"key": "status", "value": "active", "description": "Optional: active, inactive"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Create Category",
+							"request": {
+								"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+								"method": "POST",
+								"header": [{"key": "Content-Type", "value": "application/json"}],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Pain Relief\",\n  \"description\": \"Medications for pain management\",\n  \"status\": \"active\"\n}"
+								},
+								"url": {"raw": "{{base_url}}/admin/categories", "host": ["{{base_url}}"], "path": ["admin", "categories"]}
+							}
+						},
+						{
+							"name": "Get Category Detail",
+							"request": {
+								"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+								"method": "GET",
+								"header": [{"key": "Accept", "value": "application/json"}],
+								"url": {"raw": "{{base_url}}/admin/categories/1", "host": ["{{base_url}}"], "path": ["admin", "categories", "1"]}
+							}
+						},
+						{
+							"name": "Update Category",
+							"request": {
+								"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+								"method": "PUT",
+								"header": [{"key": "Content-Type", "value": "application/json"}],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Updated Category Name\",\n  \"description\": \"Updated description\",\n  \"status\": \"active\"\n}"
+								},
+								"url": {"raw": "{{base_url}}/admin/categories/1", "host": ["{{base_url}}"], "path": ["admin", "categories", "1"]}
+							}
+						},
+						{
+							"name": "Delete Category",
+							"request": {
+								"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+								"method": "DELETE",
+								"header": [{"key": "Accept", "value": "application/json"}],
+								"url": {"raw": "{{base_url}}/admin/categories/1", "host": ["{{base_url}}"], "path": ["admin", "categories", "1"]}
+							}
+						}
+					]
+				},
+				{
+					"name": "Products",
+					"item": [
+						{
+							"name": "Get Products List",
+							"request": {
+								"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+								"method": "GET",
+								"header": [{"key": "Accept", "value": "application/json"}],
+								"url": {
+									"raw": "{{base_url}}/admin/products?limit=10&category_id=1&availability_status=in_stock",
+									"host": ["{{base_url}}"],
+									"path": ["admin", "products"],
+									"query": [
+										{"key": "limit", "value": "10", "description": "Optional: Items per page"},
+										{"key": "category_id", "value": "1", "description": "Optional: Filter by category"},
+										{"key": "availability_status", "value": "in_stock", "description": "Optional: in_stock, out_of_stock, low_stock"},
+										{"key": "is_visible", "value": "1", "description": "Optional: 0 or 1", "disabled": true},
+										{"key": "search", "value": "", "description": "Optional: Search by name", "disabled": true}
+									]
+								}
+							}
+						},
+						{
+							"name": "Create Product",
+							"request": {
+								"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+								"method": "POST",
+								"header": [{"key": "Content-Type", "value": "application/json"}],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"medicine_name\": \"Paracetamol 500mg\",\n  \"image_id\": 1,\n  \"category_id\": 1,\n  \"price\": 150.00,\n  \"stock_quantity\": 100,\n  \"ingredients\": \"Paracetamol 500mg\",\n  \"discount_type\": \"percentage\",\n  \"discount_value\": 10,\n  \"how_to_use\": \"Take 1-2 tablets every 4-6 hours\",\n  \"description\": \"Fast-acting pain relief\",\n  \"is_visible\": true,\n  \"is_temporarily_hidden\": false\n}"
+								},
+								"url": {"raw": "{{base_url}}/admin/products", "host": ["{{base_url}}"], "path": ["admin", "products"]}
+							}
+						},
+						{
+							"name": "Get Product Detail",
+							"request": {
+								"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+								"method": "GET",
+								"header": [{"key": "Accept", "value": "application/json"}],
+								"url": {"raw": "{{base_url}}/admin/products/1", "host": ["{{base_url}}"], "path": ["admin", "products", "1"]}
+							}
+						},
+						{
+							"name": "Update Product",
+							"request": {
+								"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+								"method": "PUT",
+								"header": [{"key": "Content-Type", "value": "application/json"}],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"medicine_name\": \"Updated Medicine Name\",\n  \"price\": 200.00,\n  \"stock_quantity\": 50,\n  \"is_visible\": true\n}"
+								},
+								"url": {"raw": "{{base_url}}/admin/products/1", "host": ["{{base_url}}"], "path": ["admin", "products", "1"]}
+							}
+						},
+						{
+							"name": "Delete Product",
+							"request": {
+								"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+								"method": "DELETE",
+								"header": [{"key": "Accept", "value": "application/json"}],
+								"url": {"raw": "{{base_url}}/admin/products/1", "host": ["{{base_url}}"], "path": ["admin", "products", "1"]}
+							}
+						}
+					]
+				},
+				{
+					"name": "Orders",
+					"item": [
+						{
+							"name": "Get Orders List",
+							"request": {
+								"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+								"method": "GET",
+								"header": [{"key": "Accept", "value": "application/json"}],
+								"url": {
+									"raw": "{{base_url}}/admin/orders?limit=10&status=placed&payment_status=pending",
+									"host": ["{{base_url}}"],
+									"path": ["admin", "orders"],
+									"query": [
+										{"key": "limit", "value": "10", "description": "Optional: Items per page"},
+										{"key": "status", "value": "placed", "description": "Optional: placed, dispatched, delivered, completed, cancelled"},
+										{"key": "payment_status", "value": "pending", "description": "Optional: pending, paid, failed"},
+										{"key": "search", "value": "", "description": "Optional: Search by order number, customer name, phone", "disabled": true}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Order Detail",
+							"request": {
+								"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+								"method": "GET",
+								"header": [{"key": "Accept", "value": "application/json"}],
+								"url": {"raw": "{{base_url}}/admin/orders/MED-001248", "host": ["{{base_url}}"], "path": ["admin", "orders", "MED-001248"]}
+							}
+						},
+						{
+							"name": "Update Order Status",
+							"request": {
+								"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+								"method": "PUT",
+								"header": [{"key": "Content-Type", "value": "application/json"}],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"order_status\": \"dispatched\",\n  \"payment_status\": \"paid\"\n}"
+								},
+								"url": {"raw": "{{base_url}}/admin/orders/MED-001248/status", "host": ["{{base_url}}"], "path": ["admin", "orders", "MED-001248", "status"]}
+							}
+						}
+					]
+				},
+				{
+					"name": "Ad Banners",
+					"item": [
+						{
+							"name": "Get Ad Banners List",
+							"request": {
+								"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+								"method": "GET",
+								"header": [{"key": "Accept", "value": "application/json"}],
+								"url": {
+									"raw": "{{base_url}}/admin/ad-banners?limit=10",
+									"host": ["{{base_url}}"],
+									"path": ["admin", "ad-banners"],
+									"query": [{"key": "limit", "value": "10", "description": "Optional: Items per page"}]
+								}
+							}
+						},
+						{
+							"name": "Create Ad Banner",
+							"request": {
+								"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+								"method": "POST",
+								"header": [{"key": "Content-Type", "value": "application/json"}],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"Banner Title\",\n  \"image_id\": 1,\n  \"link\": \"https://example.com\",\n  \"status\": \"active\"\n}"
+								},
+								"url": {"raw": "{{base_url}}/admin/ad-banners", "host": ["{{base_url}}"], "path": ["admin", "ad-banners"]}
+							}
+						},
+						{
+							"name": "Get Ad Banner Detail",
+							"request": {
+								"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+								"method": "GET",
+								"header": [{"key": "Accept", "value": "application/json"}],
+								"url": {"raw": "{{base_url}}/admin/ad-banners/1", "host": ["{{base_url}}"], "path": ["admin", "ad-banners", "1"]}
+							}
+						},
+						{
+							"name": "Update Ad Banner",
+							"request": {
+								"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+								"method": "PUT",
+								"header": [{"key": "Content-Type", "value": "application/json"}],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"Updated Banner Title\",\n  \"status\": \"inactive\"\n}"
+								},
+								"url": {"raw": "{{base_url}}/admin/ad-banners/1", "host": ["{{base_url}}"], "path": ["admin", "ad-banners", "1"]}
+							}
+						},
+						{
+							"name": "Delete Ad Banner",
+							"request": {
+								"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+								"method": "DELETE",
+								"header": [{"key": "Accept", "value": "application/json"}],
+								"url": {"raw": "{{base_url}}/admin/ad-banners/1", "host": ["{{base_url}}"], "path": ["admin", "ad-banners", "1"]}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "9. File Upload",
+			"item": [
+				{
+					"name": "Upload File",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{"key": "file", "type": "file", "src": ""},
+								{"key": "directory", "value": "profile", "description": "Optional: profile, products, prescriptions", "type": "text"}
+							]
+						},
+						"url": {"raw": "{{base_url}}/upload-file", "host": ["{{base_url}}"], "path": ["upload-file"]}
+					}
+				},
+				{
+					"name": "Get File",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]},
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/file?id=1",
+							"host": ["{{base_url}}"],
+							"path": ["file"],
+							"query": [{"key": "id", "value": "1", "description": "Required: File ID"}]
+						}
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {"type": "text/javascript", "exec": [""]}
+		},
+		{
+			"listen": "test",
+			"script": {"type": "text/javascript", "exec": [""]}
+		}
+	],
+	"variable": [
+		{"key": "base_url", "value": "http://localhost:8000/api", "type": "default"},
+		{"key": "access_token", "value": "", "type": "secret"}
+	]
+}

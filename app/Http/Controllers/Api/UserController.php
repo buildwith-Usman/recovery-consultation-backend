@@ -392,4 +392,74 @@ class UserController extends Controller
             'errors' => null
         ], 200);
     }
+
+    public function prescriptions(Request $request)
+    {
+        try {
+            $limit = $request->input('limit') ?? 10;
+            $user = auth()->user();
+
+            $prescriptions = \App\Models\Prescription::with(['doctor.doctorInfo', 'doctor.file', 'appointment', 'prescriptionImage', 'items.product'])
+                ->forPatient($user->id)
+                ->orderBy('created_at', 'desc')
+                ->paginate($limit);
+
+            return response()->json([
+                'message' => 'Prescriptions list',
+                'data' => $prescriptions->items(),
+                'errors' => null,
+                'pagination' => [
+                    'total' => $prescriptions->total(),
+                    'current_page' => $prescriptions->currentPage(),
+                    'per_page' => $prescriptions->perPage(),
+                    'last_page' => $prescriptions->lastPage(),
+                    'from' => $prescriptions->firstItem(),
+                    'to' => $prescriptions->lastItem()
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to retrieve prescriptions',
+                'errors' => [$e->getMessage()]
+            ], 500);
+        }
+    }
+
+    public function prescription_detail(Request $request)
+    {
+        try {
+            $prescriptionId = $request->input('prescription_id');
+            $user = auth()->user();
+
+            if (!$prescriptionId) {
+                return response()->json([
+                    'message' => 'Prescription ID is required',
+                    'errors' => ['prescription_id is required']
+                ], 422);
+            }
+
+            $prescription = \App\Models\Prescription::with(['doctor.doctorInfo', 'doctor.file', 'appointment', 'prescriptionImage', 'items.product.image'])
+                ->forPatient($user->id)
+                ->find($prescriptionId);
+
+            if (!$prescription) {
+                return response()->json([
+                    'message' => 'Prescription not found',
+                    'errors' => ['Prescription does not exist']
+                ], 404);
+            }
+
+            return response()->json([
+                'message' => 'Prescription details retrieved successfully',
+                'data' => $prescription
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to retrieve prescription',
+                'errors' => [$e->getMessage()]
+            ], 500);
+        }
+    }
 }
