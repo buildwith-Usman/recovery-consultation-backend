@@ -18,7 +18,7 @@ class UserController extends Controller
         $specialization = $request->input('specialization');
         $status = $request->input('doctor.status');
 
-        $user = User::with('patientInfo', 'doctorInfo')
+        $user = User::with('patientInfo', 'doctorInfo', 'questionnaires', 'userLanguages', 'file', 'available_times', 'timeSlots')
         ->where(function ($q) use($type) {
             if($type) {
                 $q->where('type', $type);
