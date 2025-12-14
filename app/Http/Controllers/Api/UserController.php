@@ -62,6 +62,7 @@ class UserController extends Controller
                 'name' => $request->name ?? $user->name,
                 'phone' => $request->phone ?? $user->phone,
                 'profile_image_id' => $request->file_id ? $request->file_id : $user->profile_image_id,
+                'bio' => $request->bio ?? $user->bio,
             ]);
 
             $user = User::with($this->user_relational_array)->where('id', $user->id)->first();

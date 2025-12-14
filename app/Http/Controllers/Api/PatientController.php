@@ -124,16 +124,24 @@ class PatientController extends Controller
     $limit = $request->input('limit') ?? 10;
     try {
       // Example query to get doctors based on specialization
-      $doctors = User::with(['doctorInfo', 'file', 'questionnaires', 'userLanguages', 'reviews'])
+      $doctors = User::with([
+          'doctorInfo',
+          'file',
+          'questionnaires',
+          'userLanguages',
+          'reviews'
+        ])
+        ->where('type', 'doctor')
+        
         ->whereHas('doctorInfo', function ($query) use ($specialization) {
           $query->where('specialization', $specialization);
         })
-        ->whereHas('userLanguages', function ($q) use ($language) {
-          if ($language) {
+        ->when($language, function ($query) use ($language) {
+          $query->whereHas('userLanguages', function ($q) use ($language) {
             $q->where('language', $language);
-          }
+          });
         })
-        ->where('type', 'doctor')->paginate($limit);
+        ->paginate($limit);
 
       return response()->json([
         "data" => $doctors->items(),

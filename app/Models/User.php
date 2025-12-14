@@ -25,6 +25,7 @@ class User extends Authenticatable
         'type',
         'phone',
         'profile_image_id',
+        'bio',
         'email_verification_code',
         'email_verification_code_expires_at',
         'is_verified',
