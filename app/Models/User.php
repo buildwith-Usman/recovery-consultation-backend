@@ -84,6 +84,12 @@ class User extends Authenticatable
         return $this->hasMany(Appointment::class, 'doc_user_id');
     }
 
+    public function distinctPatients() {
+        return $this->hasMany(Appointment::class, 'doc_user_id')
+        ->select('doc_user_id', 'pat_user_id')
+        ->distinct('pat_user_id');
+    }
+
     public function available_times() {
         return $this->hasMany(UserAvailableTime::class, 'user_id');
     }

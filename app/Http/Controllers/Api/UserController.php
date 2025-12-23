@@ -28,7 +28,11 @@ class UserController extends Controller
         $user = auth()->user();
         $user = User::with(array_merge($this->user_relational_array, ['reviews' => function ($query) {
             $query->latest()->limit(5);
-        }]))->where('id', $user->id)->first();
+        }]))
+        ->when($user->type === 'doctor', function ($q) {
+            $q->withCount('distinctPatients');
+        })
+        ->where('id', $user->id)->first();
         return response()->json(['data' => ['user' => $user]]);
     }
     public function update_profile(Request $request)
