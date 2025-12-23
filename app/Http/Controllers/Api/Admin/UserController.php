@@ -98,7 +98,7 @@ class UserController extends Controller
             ], 404);
         }
 
-        $userData = $request->only(['name', 'email', 'phone']);
+        $userData = $request->only(['name', 'email', 'phone', 'bio']);
         if ($request->has('file_id')) {
             $userData['profile_image_id'] = $request->input('file_id');
         }
