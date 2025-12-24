@@ -67,6 +67,7 @@ Route::name('api.')->group(function () {
         Route::get('match-doctors-list', [PatientController::class, 'match_doctors_list'])->name('patient.match.doctors.list');
         Route::get('doctors-list', [PatientController::class, 'doctors_list'])->name('patient.doctors.list');
         Route::post('appointment-booking', [PatientController::class, 'appointment_booking'])->name('patient.appointment.booking');
+        Route::post('appointment-update', [PatientController::class, 'appointment_update'])->name('patient.appointment.update');
         Route::post('add-reviews', [PatientController::class, 'add_reviews'])->name('patient.reviews.add');
 
         // Doctor's endpoints

@@ -279,6 +279,54 @@ class PatientController extends Controller
     }
   }
 
+  public function appointment_update(Request $request)
+  {
+    try {
+      $request->validate([
+        'appointment_id' => 'required|exists:appointments,id',
+      ]);
+
+      $user = auth()->user();
+
+      $appointment = Appointment::where('id', $request->appointment_id)
+        ->where(function ($q) use ($user) {
+          $q->where('pat_user_id', $user->id);
+          $q->orWhere('doc_user_id', $user->id);
+        })
+        ->first();
+
+      if (!$appointment) {
+        return response()->json([
+          'message' => 'Appointment not found',
+          'errors' => ['The specified appointment does not exist for this patient']
+        ], 404);
+      }
+
+      $appointment->status = $request->status;
+      $appointment->save();
+
+      return response()->json([
+        'message' => 'Appointment updated successfully',
+        'data' => $appointment
+      ], 200);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+      $errorsList = [];
+      foreach ($e->errors() as $err) {
+        $errorsList = array_merge($errorsList, $err);
+      }
+      return response()->json([
+        'message' => 'Validation failed',
+        'errors' => $errorsList
+      ], 422);
+    } catch (\Exception $e) {
+      return response()->json([
+        'message' => 'Appointment update failed',
+        'errors' => [$e->getMessage()]
+      ], 500);
+    }
+  }
+
   public function add_reviews(Request $request)
   {
     try {

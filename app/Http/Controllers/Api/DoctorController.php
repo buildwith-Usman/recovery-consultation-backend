@@ -15,10 +15,15 @@ class DoctorController extends Controller
     $user = auth()->user();
 
     try {
-      $patients = Appointment::where('doc_user_id', $user->id)
-        ->where('status', 'completed')
-        ->distinct()
-        ->paginate($limit);
+      $patients = Appointment::with(['patient' => function ($q) {
+        $q->with(['patientInfo', 'doctorInfo', 'questionnaires', 'userLanguages', 'file']);
+      }])
+      ->where('doc_user_id', $user->id)
+      ->when($request->has('status'), function ($q) use ($request) {
+        $q->where('status', $request->input('status'));
+      })
+      ->distinct()
+      ->paginate($limit);
 
       return response()->json([
         "message" => "Patients list",
