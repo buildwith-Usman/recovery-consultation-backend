@@ -384,7 +384,7 @@ class UserController extends Controller
 
         // Check if the authenticated user has access to this appointment
         $user = auth()->user();
-        if ($appointment->pat_user_id !== $user->id && $appointment->doc_user_id !== $user->id) {
+        if ($appointment->pat_user_id !== $user->id && $appointment->doc_user_id !== $user->id && $user->type !== 'admin') {
             return response()->json([
                 'message' => 'Unauthorized',
                 'errors' => ['You do not have access to this appointment']

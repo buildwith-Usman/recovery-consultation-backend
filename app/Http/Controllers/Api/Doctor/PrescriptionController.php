@@ -94,12 +94,12 @@ class PrescriptionController extends Controller
             }
 
             // Validate that at least image or items are provided
-            if (empty($validatedData['prescription_image_id']) && empty($validatedData['items'])) {
-                return response()->json([
-                    'message' => 'Validation failed',
-                    'errors' => ['Either prescription image or items must be provided']
-                ], 422);
-            }
+            // if (empty($validatedData['prescription_image_id']) && empty($validatedData['items'])) {
+            //     return response()->json([
+            //         'message' => 'Validation failed',
+            //         'errors' => ['Either prescription image or items must be provided']
+            //     ], 422);
+            // }
 
             // Create prescription
             $prescription = Prescription::create([
