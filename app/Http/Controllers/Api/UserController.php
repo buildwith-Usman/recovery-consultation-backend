@@ -313,7 +313,9 @@ class UserController extends Controller
             },
             'doctor' => function ($q) {
                 $q->with('patientInfo', 'doctorInfo', 'file');
-            }
+            },
+            'timeSlot',
+            'prescriptions'
         ])
         ->when($type === 'upcoming', function ($q) {
             $q->where('start_time_in_secconds', '>=', time());
@@ -372,7 +374,8 @@ class UserController extends Controller
             'doctor' => function ($q) {
                 $q->with('patientInfo', 'doctorInfo', 'file');
             },
-            'timeSlot'
+            'timeSlot',
+            'prescriptions'
         ])->find($appointmentId);
 
         if (!$appointment) {

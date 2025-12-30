@@ -36,4 +36,12 @@ class Appointment extends Model
     public function timeSlot() {
         return $this->belongsTo(UserTimeSlot::class, 'time_slot_id');
     }
+
+    /**
+     * Get the prescriptions associated with the appointment.
+     */
+    public function prescriptions()
+    {
+        return $this->hasMany(Prescription::class, 'appointment_id');
+    }
 }
