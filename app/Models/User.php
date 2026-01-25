@@ -97,4 +97,9 @@ class User extends Authenticatable
     public function timeSlots() {
         return $this->hasMany(UserTimeSlot::class, 'user_id');
     }
+
+    public function favoriteProducts() {
+        return $this->belongsToMany(Product::class, 'user_favorite_products')
+            ->withTimestamps();
+    }
 }

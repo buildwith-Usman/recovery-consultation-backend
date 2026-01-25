@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\RegisterController;
 use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\Api\HealthController;
+use App\Http\Controllers\Api\UserFavoriteController;
 
 // add prefix name for api
 
@@ -99,6 +100,12 @@ Route::name('api.')->group(function () {
         Route::post('orders', [\App\Http\Controllers\Api\OrderController::class, 'store'])->name('orders.create');
         Route::get('orders/{orderNumber}', [\App\Http\Controllers\Api\OrderController::class, 'show'])->name('orders.show');
         Route::get('orders/{orderNumber}/track', [\App\Http\Controllers\Api\OrderController::class, 'track'])->name('orders.track');
+
+        // User Favorite Products
+        Route::get('favorites', [UserFavoriteController::class, 'index'])->name('favorites.index');
+        Route::post('favorites/{productId}', [UserFavoriteController::class, 'store'])->name('favorites.store');
+        Route::delete('favorites/{productId}', [UserFavoriteController::class, 'destroy'])->name('favorites.destroy');
+        Route::get('favorites/{productId}/check', [UserFavoriteController::class, 'check'])->name('favorites.check');
 
         // Admin endpoints
         Route::middleware(['auth.admin'])->prefix('admin')->group(function () {
