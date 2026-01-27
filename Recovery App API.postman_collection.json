@@ -1454,10 +1454,10 @@
       ]
     },
     {
-      "name": "8. Favorites",
+      "name": "8. Features",
       "item": [
         {
-          "name": "Get Favorites List",
+          "name": "Get Features List",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1477,19 +1477,19 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/favorites",
+              "raw": "{{base_url}}/features",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "favorites"
+                "features"
               ]
             }
           },
           "response": []
         },
         {
-          "name": "Add to Favorites",
+          "name": "Add to Features",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1509,21 +1509,21 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/favorites/1",
+              "raw": "{{base_url}}/features/1",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "favorites",
+                "features",
                 "1"
               ]
             },
-            "description": "Add a product to user's favorites. Replace '1' with the product ID."
+            "description": "Add a product to user's features. Replace '1' with the product ID."
           },
           "response": []
         },
         {
-          "name": "Remove from Favorites",
+          "name": "Remove from Features",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1543,21 +1543,21 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/favorites/1",
+              "raw": "{{base_url}}/features/1",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "favorites",
+                "features",
                 "1"
               ]
             },
-            "description": "Remove a product from user's favorites. Replace '1' with the product ID."
+            "description": "Remove a product from user's features. Replace '1' with the product ID."
           },
           "response": []
         },
         {
-          "name": "Check if Favorite",
+          "name": "Check if Feature",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1577,17 +1577,17 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/favorites/1/check",
+              "raw": "{{base_url}}/features/1/check",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "favorites",
+                "features",
                 "1",
                 "check"
               ]
             },
-            "description": "Check if a product is in user's favorites. Replace '1' with the product ID."
+            "description": "Check if a product is in user's features. Replace '1' with the product ID."
           },
           "response": []
         }

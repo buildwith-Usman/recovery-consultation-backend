@@ -136,9 +136,9 @@ class Product extends Model
         $this->save();
     }
 
-    public function favoritedByUsers()
+    public function featuredByUsers()
     {
-        return $this->belongsToMany(User::class, 'user_favorite_products')
+        return $this->belongsToMany(User::class, 'user_feature_products')
             ->withTimestamps();
     }
 }

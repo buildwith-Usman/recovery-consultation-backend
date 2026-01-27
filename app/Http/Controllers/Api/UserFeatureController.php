@@ -4,29 +4,28 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class UserFavoriteController extends Controller
+class UserFeatureController extends Controller
 {
     /**
-     * Get the authenticated user's favorite products.
+     * Get the authenticated user's featured products.
      */
     public function index()
     {
         $user = Auth::user();
-        $favorites = $user->favoriteProducts()
+        $features = $user->featureProducts()
             ->with(['image', 'category'])
             ->get();
 
         return response()->json([
             'success' => true,
-            'data' => $favorites
+            'data' => $features
         ]);
     }
 
     /**
-     * Add a product to the user's favorites.
+     * Add a product to the user's features.
      */
     public function store($productId)
     {
@@ -40,54 +39,54 @@ class UserFavoriteController extends Controller
             ], 404);
         }
 
-        if ($user->favoriteProducts()->where('product_id', $productId)->exists()) {
+        if ($user->featureProducts()->where('product_id', $productId)->exists()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Product is already in favorites'
+                'message' => 'Product is already in features'
             ], 409);
         }
 
-        $user->favoriteProducts()->attach($productId);
+        $user->featureProducts()->attach($productId);
 
         return response()->json([
             'success' => true,
-            'message' => 'Product added to favorites'
+            'message' => 'Product added to features'
         ], 201);
     }
 
     /**
-     * Remove a product from the user's favorites.
+     * Remove a product from the user's features.
      */
     public function destroy($productId)
     {
         $user = Auth::user();
 
-        if (!$user->favoriteProducts()->where('product_id', $productId)->exists()) {
+        if (!$user->featureProducts()->where('product_id', $productId)->exists()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Product is not in favorites'
+                'message' => 'Product is not in features'
             ], 404);
         }
 
-        $user->favoriteProducts()->detach($productId);
+        $user->featureProducts()->detach($productId);
 
         return response()->json([
             'success' => true,
-            'message' => 'Product removed from favorites'
+            'message' => 'Product removed from features'
         ]);
     }
 
     /**
-     * Check if a product is in the user's favorites.
+     * Check if a product is in the user's features.
      */
     public function check($productId)
     {
         $user = Auth::user();
-        $isFavorite = $user->favoriteProducts()->where('product_id', $productId)->exists();
+        $isFeature = $user->featureProducts()->where('product_id', $productId)->exists();
 
         return response()->json([
             'success' => true,
-            'is_favorite' => $isFavorite
+            'is_feature' => $isFeature
         ]);
     }
 }
