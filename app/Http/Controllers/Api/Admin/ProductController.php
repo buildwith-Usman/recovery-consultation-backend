@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\ProductImage;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -22,7 +23,8 @@ class ProductController extends Controller
             $sortBy = $request->input('sort_by') ?? 'created_at';
             $sortOrder = $request->input('sort_order') ?? 'desc';
 
-            $products = Product::with(['image', 'category', 'creator'])
+            $products = Product::with(['image', 'images.file', 'category', 'creator'])
+                ->withCount('featuredByUsers')
                 ->when($categoryId, function ($q) use ($categoryId) {
                     $q->byCategory($categoryId);
                 })
@@ -79,7 +81,9 @@ class ProductController extends Controller
                 'how_to_use' => 'nullable|string',
                 'description' => 'nullable|string',
                 'is_visible' => 'nullable|boolean',
-                'is_temporarily_hidden' => 'nullable|boolean'
+                'is_temporarily_hidden' => 'nullable|boolean',
+                'image_ids' => 'nullable|array',
+                'image_ids.*' => 'exists:files,id'
             ]);
 
             // Validate discount
@@ -105,7 +109,18 @@ class ProductController extends Controller
                 $validatedData['stock_quantity'] = 0;
             }
 
+            $imageIds = $validatedData['image_ids'] ?? [];
+            unset($validatedData['image_ids']);
+
             $product = Product::create($validatedData);
+
+            // Create additional gallery images
+            foreach ($imageIds as $index => $fileId) {
+                $product->images()->create([
+                    'file_id' => $fileId,
+                    'sort_order' => $index,
+                ]);
+            }
 
             // Auto-update availability status based on stock
             if (!isset($validatedData['availability_status'])) {
@@ -113,7 +128,7 @@ class ProductController extends Controller
             }
 
             // Load relationships
-            $product->load(['image', 'category', 'creator']);
+            $product->load(['image', 'images.file', 'category', 'creator']);
 
             return response()->json([
                 'message' => 'Product created successfully',
@@ -144,7 +159,7 @@ class ProductController extends Controller
     public function show($id)
     {
         try {
-            $product = Product::with(['image', 'category', 'creator'])->find($id);
+            $product = Product::with(['image', 'images.file', 'category', 'creator'])->find($id);
 
             if (!$product) {
                 return response()->json([
@@ -194,7 +209,9 @@ class ProductController extends Controller
                 'how_to_use' => 'nullable|string',
                 'description' => 'nullable|string',
                 'is_visible' => 'nullable|boolean',
-                'is_temporarily_hidden' => 'nullable|boolean'
+                'is_temporarily_hidden' => 'nullable|boolean',
+                'image_ids' => 'nullable|array',
+                'image_ids.*' => 'exists:files,id'
             ]);
 
             // Validate discount
@@ -205,10 +222,28 @@ class ProductController extends Controller
                 ], 422);
             }
 
+            // Extract image_ids before updating product fields
+            $imageIds = null;
+            if (array_key_exists('image_ids', $validatedData)) {
+                $imageIds = $validatedData['image_ids'];
+                unset($validatedData['image_ids']);
+            }
+
             // Update only provided fields
             $product->update(array_filter($validatedData, function ($value) {
                 return !is_null($value);
             }));
+
+            // Replace gallery images if image_ids was provided
+            if ($imageIds !== null) {
+                $product->images()->delete();
+                foreach ($imageIds as $index => $fileId) {
+                    $product->images()->create([
+                        'file_id' => $fileId,
+                        'sort_order' => $index,
+                    ]);
+                }
+            }
 
             // Auto-update availability status if stock quantity changed
             if (isset($validatedData['stock_quantity'])) {
@@ -216,7 +251,7 @@ class ProductController extends Controller
             }
 
             // Load relationships
-            $product->load(['image', 'category', 'creator']);
+            $product->load(['image', 'images.file', 'category', 'creator']);
 
             return response()->json([
                 'message' => 'Product updated successfully',

@@ -136,6 +136,14 @@ class Product extends Model
         $this->save();
     }
 
+    /**
+     * Get the additional gallery images for the product.
+     */
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class)->orderBy('sort_order');
+    }
+
     public function featuredByUsers()
     {
         return $this->belongsToMany(User::class, 'user_feature_products')
