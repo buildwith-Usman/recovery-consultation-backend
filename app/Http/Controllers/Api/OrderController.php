@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Prescription;
 use App\Models\Product;
+use App\Models\ProductDosage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -77,6 +78,7 @@ class OrderController extends Controller
             $validatedData = $request->validate([
                 'items' => 'required|array|min:1',
                 'items.*.product_id' => 'required|exists:products,id',
+                'items.*.product_dosage_id' => 'required|exists:product_dosages,id',
                 'items.*.quantity' => 'required|integer|min:1',
                 'items.*.dosage_info' => 'nullable|string',
                 'customer_name' => 'required|string|max:255',
@@ -113,21 +115,33 @@ class OrderController extends Controller
                         ], 422);
                     }
 
-                    // Check stock availability
-                    if ($product->stock_quantity < $item['quantity']) {
+                    // Fetch dosage and verify it belongs to the product
+                    $dosage = ProductDosage::find($item['product_dosage_id']);
+
+                    if ($dosage->product_id !== $product->id) {
                         DB::rollBack();
                         return response()->json([
-                            'message' => 'Insufficient stock',
-                            'errors' => [$product->medicine_name . ' has only ' . $product->stock_quantity . ' items available']
+                            'message' => 'Invalid dosage',
+                            'errors' => ['The selected dosage does not belong to ' . $product->medicine_name]
                         ], 422);
                     }
 
-                    $price = $product->final_price;
+                    // Check stock availability on dosage
+                    if ($dosage->stock_quantity < $item['quantity']) {
+                        DB::rollBack();
+                        return response()->json([
+                            'message' => 'Insufficient stock',
+                            'errors' => [$product->medicine_name . ' (' . $dosage->name . ') has only ' . $dosage->stock_quantity . ' items available']
+                        ], 422);
+                    }
+
+                    $price = $dosage->final_price;
                     $itemTotal = $item['quantity'] * $price;
                     $subtotal += $itemTotal;
 
                     $orderItems[] = [
                         'product' => $product,
+                        'dosage' => $dosage,
                         'quantity' => $item['quantity'],
                         'price' => $price,
                         'dosage_info' => $item['dosage_info'] ?? null,
@@ -170,17 +184,19 @@ class OrderController extends Controller
                     OrderItem::create([
                         'order_id' => $order->id,
                         'product_id' => $item['product']->id,
+                        'product_dosage_id' => $item['dosage']->id,
                         'product_name' => $item['product']->medicine_name,
+                        'dosage_name' => $item['dosage']->name,
                         'quantity' => $item['quantity'],
                         'price' => $item['price'],
                         'dosage_info' => $item['dosage_info'],
                         'item_total' => $item['item_total']
                     ]);
 
-                    // Reduce stock
-                    $item['product']->stock_quantity -= $item['quantity'];
-                    $item['product']->save();
-                    $item['product']->updateAvailabilityStatus();
+                    // Reduce stock on dosage
+                    $item['dosage']->stock_quantity -= $item['quantity'];
+                    $item['dosage']->save();
+                    $item['dosage']->updateAvailabilityStatus();
                 }
 
                 // Update prescription status if prescription order
@@ -193,7 +209,7 @@ class OrderController extends Controller
                 DB::commit();
 
                 // Load relationships
-                $order->load(['items.product', 'prescription.doctor']);
+                $order->load(['items.product', 'items.dosage', 'prescription.doctor']);
 
                 return response()->json([
                     'message' => 'Order placed successfully',
@@ -231,7 +247,7 @@ class OrderController extends Controller
         try {
             $user = auth()->user();
 
-            $order = Order::with(['items.product.image', 'prescription.doctor'])
+            $order = Order::with(['items.product.image', 'items.dosage', 'prescription.doctor'])
                 ->forUser($user->id)
                 ->where('order_number', $orderNumber)
                 ->first();
@@ -254,6 +270,7 @@ class OrderController extends Controller
                 'items' => $order->items->map(function ($item) {
                     return [
                         'product_name' => $item->product_name,
+                        'dosage_name' => $item->dosage_name,
                         'dosage_info' => $item->dosage_info,
                         'quantity' => $item->quantity,
                         'price' => $item->price,

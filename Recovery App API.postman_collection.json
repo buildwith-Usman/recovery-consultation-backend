@@ -1326,7 +1326,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"quantity\": 2,\n      \"dosage_info\": \"1 tab × 3/day | 5 days\"\n    },\n    {\n      \"product_id\": 2,\n      \"quantity\": 1\n    }\n  ],\n  \"customer_name\": \"John Doe\",\n  \"customer_phone\": \"03001234567\",\n  \"delivery_address\": \"House 123, Street ABC, Lahore\",\n  \"city\": \"Lahore\",\n  \"country\": \"Pakistan\",\n  \"postal_code\": \"54000\",\n  \"payment_method\": \"jazzcash\",\n  \"prescription_id\": 1,\n  \"delivery_fee\": 100,\n  \"tax_amount\": 0,\n  \"other_fees\": 0\n}"
+              "raw": "{\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"product_dosage_id\": 1,\n      \"quantity\": 2,\n      \"dosage_info\": \"1 tab × 3/day | 5 days\"\n    },\n    {\n      \"product_id\": 2,\n      \"product_dosage_id\": 3,\n      \"quantity\": 1\n    }\n  ],\n  \"customer_name\": \"John Doe\",\n  \"customer_phone\": \"03001234567\",\n  \"delivery_address\": \"House 123, Street ABC, Lahore\",\n  \"city\": \"Lahore\",\n  \"country\": \"Pakistan\",\n  \"postal_code\": \"54000\",\n  \"payment_method\": \"jazzcash\",\n  \"prescription_id\": 1,\n  \"delivery_fee\": 100,\n  \"tax_amount\": 0,\n  \"other_fees\": 0\n}"
             },
             "url": {
               "raw": "{{base_url}}/orders",
@@ -2017,7 +2017,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"medicine_name\": \"Paracetamol 500mg\",\n  \"image_id\": 1,\n  \"image_ids\": [2, 3, 4],\n  \"category_id\": 1,\n  \"price\": 150.00,\n  \"stock_quantity\": 100,\n  \"ingredients\": \"Paracetamol 500mg\",\n  \"discount_type\": \"percentage\",\n  \"discount_value\": 10,\n  \"how_to_use\": \"Take 1-2 tablets every 4-6 hours\",\n  \"description\": \"Fast-acting pain relief\",\n  \"is_visible\": true,\n  \"is_temporarily_hidden\": false\n}"
+                  "raw": "{\n  \"medicine_name\": \"Paracetamol\",\n  \"image_id\": 1,\n  \"image_ids\": [2, 3, 4],\n  \"category_id\": 1,\n  \"ingredients\": \"Paracetamol\",\n  \"discount_type\": \"percentage\",\n  \"discount_value\": 10,\n  \"how_to_use\": \"Take 1-2 tablets every 4-6 hours\",\n  \"description\": \"Fast-acting pain relief\",\n  \"is_visible\": true,\n  \"is_temporarily_hidden\": false,\n  \"dosages\": [\n    { \"name\": \"250mg\", \"price\": 80, \"stock_quantity\": 100 },\n    { \"name\": \"500mg\", \"price\": 150, \"stock_quantity\": 50 }\n  ]\n}"
                 },
                 "url": {
                   "raw": "{{base_url}}/admin/products",
@@ -2088,7 +2088,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"medicine_name\": \"Updated Medicine Name\",\n  \"price\": 200.00,\n  \"stock_quantity\": 50,\n  \"image_id\": 1,\n  \"image_ids\": [5, 6],\n  \"is_visible\": true\n}"
+                  "raw": "{\n  \"medicine_name\": \"Updated Medicine Name\",\n  \"image_id\": 1,\n  \"image_ids\": [5, 6],\n  \"is_visible\": true,\n  \"dosages\": [\n    { \"name\": \"250mg\", \"price\": 100, \"stock_quantity\": 80 },\n    { \"name\": \"500mg\", \"price\": 200, \"stock_quantity\": 50 }\n  ]\n}"
                 },
                 "url": {
                   "raw": "{{base_url}}/admin/products/1",

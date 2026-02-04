@@ -15,9 +15,6 @@ class Product extends Model
         'medicine_name',
         'image_id',
         'category_id',
-        'price',
-        'stock_quantity',
-        'availability_status',
         'ingredients',
         'discount_type',
         'discount_value',
@@ -36,20 +33,11 @@ class Product extends Model
     protected function casts(): array
     {
         return [
-            'price' => 'decimal:2',
             'discount_value' => 'decimal:2',
-            'stock_quantity' => 'integer',
             'is_visible' => 'boolean',
             'is_temporarily_hidden' => 'boolean',
         ];
     }
-
-    /**
-     * The accessors to append to the model's array form.
-     *
-     * @var array
-     */
-    protected $appends = ['final_price'];
 
     /**
      * Get the image associated with the product.
@@ -76,23 +64,11 @@ class Product extends Model
     }
 
     /**
-     * Get the final price after discount.
+     * Get the dosage variations for the product.
      */
-    public function getFinalPriceAttribute()
+    public function dosages()
     {
-        if (!$this->discount_type || !$this->discount_value) {
-            return $this->price;
-        }
-
-        if ($this->discount_type === 'percentage') {
-            return $this->price - ($this->price * $this->discount_value / 100);
-        }
-
-        if ($this->discount_type === 'flat') {
-            return max(0, $this->price - $this->discount_value);
-        }
-
-        return $this->price;
+        return $this->hasMany(ProductDosage::class)->orderBy('sort_order');
     }
 
     /**
@@ -102,7 +78,9 @@ class Product extends Model
     {
         return $query->where('is_visible', true)
             ->where('is_temporarily_hidden', false)
-            ->whereIn('availability_status', ['in_stock', 'low_stock']);
+            ->whereHas('dosages', function ($q) {
+                $q->whereIn('availability_status', ['in_stock', 'low_stock']);
+            });
     }
 
     /**
@@ -119,21 +97,6 @@ class Product extends Model
     public function scopeSearch($query, $search)
     {
         return $query->where('medicine_name', 'like', '%' . $search . '%');
-    }
-
-    /**
-     * Update availability status based on stock quantity.
-     */
-    public function updateAvailabilityStatus()
-    {
-        if ($this->stock_quantity <= 0) {
-            $this->availability_status = 'out_of_stock';
-        } elseif ($this->stock_quantity < 10) {
-            $this->availability_status = 'low_stock';
-        } else {
-            $this->availability_status = 'in_stock';
-        }
-        $this->save();
     }
 
     /**

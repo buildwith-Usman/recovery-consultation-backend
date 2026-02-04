@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\ProductDosage;
 use App\Models\ProductImage;
 use Illuminate\Http\Request;
 
@@ -17,19 +18,15 @@ class ProductController extends Controller
         try {
             $limit = $request->input('limit') ?? 10;
             $categoryId = $request->input('category_id');
-            $availabilityStatus = $request->input('availability_status');
             $isVisible = $request->input('is_visible');
             $search = $request->input('search');
             $sortBy = $request->input('sort_by') ?? 'created_at';
             $sortOrder = $request->input('sort_order') ?? 'desc';
 
-            $products = Product::with(['image', 'images.file', 'category', 'creator'])
+            $products = Product::with(['image', 'images.file', 'category', 'creator', 'dosages'])
                 ->withCount('featuredByUsers')
                 ->when($categoryId, function ($q) use ($categoryId) {
                     $q->byCategory($categoryId);
-                })
-                ->when($availabilityStatus, function ($q) use ($availabilityStatus) {
-                    $q->where('availability_status', $availabilityStatus);
                 })
                 ->when(isset($isVisible), function ($q) use ($isVisible) {
                     $q->where('is_visible', $isVisible);
@@ -72,9 +69,6 @@ class ProductController extends Controller
                 'medicine_name' => 'required|string|max:255',
                 'image_id' => 'nullable|exists:files,id',
                 'category_id' => 'required|exists:categories,id',
-                'price' => 'required|numeric|min:0',
-                'stock_quantity' => 'nullable|integer|min:0',
-                'availability_status' => 'nullable|in:in_stock,out_of_stock,low_stock',
                 'ingredients' => 'nullable|string',
                 'discount_type' => 'nullable|in:percentage,flat',
                 'discount_value' => 'nullable|numeric|min:0',
@@ -83,7 +77,11 @@ class ProductController extends Controller
                 'is_visible' => 'nullable|boolean',
                 'is_temporarily_hidden' => 'nullable|boolean',
                 'image_ids' => 'nullable|array',
-                'image_ids.*' => 'exists:files,id'
+                'image_ids.*' => 'exists:files,id',
+                'dosages' => 'required|array|min:1',
+                'dosages.*.name' => 'required|string|max:255',
+                'dosages.*.price' => 'required|numeric|min:0',
+                'dosages.*.stock_quantity' => 'nullable|integer|min:0',
             ]);
 
             // Validate discount
@@ -104,13 +102,9 @@ class ProductController extends Controller
             // Add authenticated admin user as creator
             $validatedData['created_by'] = auth()->user()->id;
 
-            // Set default stock quantity if not provided
-            if (!isset($validatedData['stock_quantity'])) {
-                $validatedData['stock_quantity'] = 0;
-            }
-
             $imageIds = $validatedData['image_ids'] ?? [];
-            unset($validatedData['image_ids']);
+            $dosages = $validatedData['dosages'];
+            unset($validatedData['image_ids'], $validatedData['dosages']);
 
             $product = Product::create($validatedData);
 
@@ -122,13 +116,19 @@ class ProductController extends Controller
                 ]);
             }
 
-            // Auto-update availability status based on stock
-            if (!isset($validatedData['availability_status'])) {
-                $product->updateAvailabilityStatus();
+            // Create dosage variations
+            foreach ($dosages as $index => $dosage) {
+                $productDosage = $product->dosages()->create([
+                    'name' => $dosage['name'],
+                    'price' => $dosage['price'],
+                    'stock_quantity' => $dosage['stock_quantity'] ?? 0,
+                    'sort_order' => $index,
+                ]);
+                $productDosage->updateAvailabilityStatus();
             }
 
             // Load relationships
-            $product->load(['image', 'images.file', 'category', 'creator']);
+            $product->load(['image', 'images.file', 'category', 'creator', 'dosages']);
 
             return response()->json([
                 'message' => 'Product created successfully',
@@ -159,7 +159,7 @@ class ProductController extends Controller
     public function show($id)
     {
         try {
-            $product = Product::with(['image', 'images.file', 'category', 'creator'])->find($id);
+            $product = Product::with(['image', 'images.file', 'category', 'creator', 'dosages'])->find($id);
 
             if (!$product) {
                 return response()->json([
@@ -200,9 +200,6 @@ class ProductController extends Controller
                 'medicine_name' => 'nullable|string|max:255',
                 'image_id' => 'nullable|exists:files,id',
                 'category_id' => 'nullable|exists:categories,id',
-                'price' => 'nullable|numeric|min:0',
-                'stock_quantity' => 'nullable|integer|min:0',
-                'availability_status' => 'nullable|in:in_stock,out_of_stock,low_stock',
                 'ingredients' => 'nullable|string',
                 'discount_type' => 'nullable|in:percentage,flat',
                 'discount_value' => 'nullable|numeric|min:0',
@@ -211,7 +208,11 @@ class ProductController extends Controller
                 'is_visible' => 'nullable|boolean',
                 'is_temporarily_hidden' => 'nullable|boolean',
                 'image_ids' => 'nullable|array',
-                'image_ids.*' => 'exists:files,id'
+                'image_ids.*' => 'exists:files,id',
+                'dosages' => 'nullable|array|min:1',
+                'dosages.*.name' => 'required|string|max:255',
+                'dosages.*.price' => 'required|numeric|min:0',
+                'dosages.*.stock_quantity' => 'nullable|integer|min:0',
             ]);
 
             // Validate discount
@@ -222,11 +223,17 @@ class ProductController extends Controller
                 ], 422);
             }
 
-            // Extract image_ids before updating product fields
+            // Extract image_ids and dosages before updating product fields
             $imageIds = null;
             if (array_key_exists('image_ids', $validatedData)) {
                 $imageIds = $validatedData['image_ids'];
                 unset($validatedData['image_ids']);
+            }
+
+            $dosages = null;
+            if (array_key_exists('dosages', $validatedData)) {
+                $dosages = $validatedData['dosages'];
+                unset($validatedData['dosages']);
             }
 
             // Update only provided fields
@@ -245,13 +252,22 @@ class ProductController extends Controller
                 }
             }
 
-            // Auto-update availability status if stock quantity changed
-            if (isset($validatedData['stock_quantity'])) {
-                $product->updateAvailabilityStatus();
+            // Replace dosages if provided
+            if ($dosages !== null) {
+                $product->dosages()->delete();
+                foreach ($dosages as $index => $dosage) {
+                    $productDosage = $product->dosages()->create([
+                        'name' => $dosage['name'],
+                        'price' => $dosage['price'],
+                        'stock_quantity' => $dosage['stock_quantity'] ?? 0,
+                        'sort_order' => $index,
+                    ]);
+                    $productDosage->updateAvailabilityStatus();
+                }
             }
 
             // Load relationships
-            $product->load(['image', 'images.file', 'category', 'creator']);
+            $product->load(['image', 'images.file', 'category', 'creator', 'dosages']);
 
             return response()->json([
                 'message' => 'Product updated successfully',

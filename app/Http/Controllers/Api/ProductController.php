@@ -20,7 +20,7 @@ class ProductController extends Controller
             $sortBy = $request->input('sort_by') ?? 'created_at';
             $sortOrder = $request->input('sort_order') ?? 'desc';
 
-            $products = Product::with(['image', 'images.file', 'category'])
+            $products = Product::with(['image', 'images.file', 'category', 'dosages'])
                 ->visibleToCustomers()
                 ->when($categoryId, function ($q) use ($categoryId) {
                     $q->byCategory($categoryId);
@@ -59,7 +59,7 @@ class ProductController extends Controller
     public function show($id)
     {
         try {
-            $product = Product::with(['image', 'images.file', 'category'])
+            $product = Product::with(['image', 'images.file', 'category', 'dosages'])
                 ->visibleToCustomers()
                 ->find($id);
 
@@ -92,7 +92,7 @@ class ProductController extends Controller
             $limit = $request->input('limit') ?? 10;
             $search = $request->input('search');
 
-            $products = Product::with(['image', 'images.file', 'category'])
+            $products = Product::with(['image', 'images.file', 'category', 'dosages'])
                 ->visibleToCustomers()
                 ->byCategory($categoryId)
                 ->when($search, function ($q) use ($search) {
